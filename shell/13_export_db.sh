@@ -7,11 +7,11 @@ echo "ローカルDBのパスワードを入力してください"
 read pw
 
 echo 'SQLをエクスポートします。'
-mysqldump -uroot -p$pw cake_demo > cake_demo.sql
+mysqldump -uroot -p$pw zss_rec2 > zss_rec2.sql
 echo 'エクスポートしました。'
 
 echo 'SQLファイルをサーバーに転送します。'
-scp cake_demo.sql amaraimusi@amaraimusi.sakura.ne.jp:www/cake_demo/shell
+scp zss_rec2.sql amaraimusi@amaraimusi.sakura.ne.jp:www/zss_rec2/shell
 echo '転送しました。'
 
 echo "------------ 終わり"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo "DBパスワードを入力してください"
-mysqldump -Q -h mysql303.db.sakura.ne.jp -u amaraimusi -p amaraimusi_cake_demo > www/cake_demo/shell/cake_demo.sql 2> www/cake_demo/shell/dump.error.txt
+mysqldump -Q -h mysql716.db.sakura.ne.jp -u amaraimusi -p amaraimusi_zss_rec2 > www/zss_rec2/shell/zss_rec2.sql 2> www/zss_rec2/shell/dump.error.txt
 
 echo "出力完了"

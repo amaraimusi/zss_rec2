@@ -4,7 +4,7 @@ echo 'サーバー先で解凍します。'
 ssh -l amaraimusi amaraimusi.sakura.ne.jp "
 	cd www;
 	pwd;
-	tar vxzf cake_demo.tar.gz;
+	tar vxzf zss_rec2.tar.gz;
 	exit;
 	"
 

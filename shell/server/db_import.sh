@@ -4,5 +4,5 @@ echo 'さくらスタンダードのコントロールパネルで先にデー�
 echo "DBパスワードを入力してください"
 read pw
 
-mysql -h mysql303.db.sakura.ne.jp -u amaraimusi -p$pw -B amaraimusi_cake_demo < www/cake_demo/shell/cake_demo.sql
+mysql -h mysql716.db.sakura.ne.jp -u amaraimusi -p$pw -B amaraimusi_zss_rec2 < www/zss_rec2/shell/zss_rec2.sql
 echo "出力完了"
