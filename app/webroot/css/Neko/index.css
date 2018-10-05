@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+#neko_tbl{
+	/* Edgeのth幅指定不能防止 */
+	table-layout: fixed;
+}
+
+#neko_tbl thead .note{
+	width:200px;
+}

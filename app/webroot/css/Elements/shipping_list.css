@@ -1,0 +1,15 @@
+@CHARSET "UTF-8";
+
+
+
+#shipping_clm_cbs{
+	display:none;
+	margin-bottom: 40px;
+	border-top: solid 1px #9954bb;
+	padding: 4px;
+}
+
+#shipping_data{
+	margin-top:40px;
+	margin-bottom:70px
+}

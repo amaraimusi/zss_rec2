@@ -1,0 +1,24 @@
+@CHARSET "UTF-8";
+
+body {
+	padding-top: 60px;
+	padding-bottom: 40px;
+}
+.sidebar-nav {
+	padding: 9px 0;
+}
+
+/* メニュープルダウン用 */
+.top_menu_pull ul{
+	display:none;
+	position:absolute;
+	width:180px;
+	padding-bottom:10px;
+	background-color:#f8f8f8;
+	
+	z-index:2;
+}
+.top_menu_pull ul a{
+
+	color:#8489ae;
+}

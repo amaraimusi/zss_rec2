@@ -1,0 +1,220 @@
+/* 
+* @version 1.1.1 
+* @date 2015-1-1 | 2016-12-28
+*/
+@CHARSET "UTF-8";
+
+body {
+	padding-top: 60px;
+	padding-bottom: 40px;
+}
+.sidebar-nav {
+	padding: 9px 0;
+}
+
+/* メニュープルダウン用 */
+.top_menu_pull ul{
+	display:none;
+	position:absolute;
+	width:180px;
+	padding-bottom:10px;
+	background-color:#f8f8f8;
+	
+	z-index:2;
+}
+.top_menu_pull ul a{
+
+	color:#8489ae;
+}
+		
+/* 補足 */
+aside{
+	font-size:0.7em;
+	color:#6f6b81;
+}
+
+/* テーブル */
+.tbl2{
+	border-collapse:collapse;
+	border-color:#b7badb;
+	border: 1px #bdbfdf solid;
+}
+.tbl2 thead{
+	background-color:#cccee6;
+}
+.tbl2 tbody{
+	background-color:#f5f9fe;
+}
+.tbl2 th{
+	padding:5px;
+	border: 1px #bdbfdf dotted;
+	color:#393656;
+}
+.tbl2 td{
+	padding:5px;
+	border: 1px #bdbfdf dotted;
+	color:#34353f;
+}
+
+/* 注釈 */
+.annot{
+	color:#df3952;
+	font-style: italic;
+}
+
+/* ヘルプ */
+#help_x{
+	border:solid 3px #c69dd9;
+	padding:10px;
+	
+
+}
+#help_x h2{
+	color:#c69dd9;
+}
+.help_x{
+	color:#333839;
+	font-size:14px;
+	line-height:2em;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", Helvetica, Arial, Verdana, sans-serif
+	
+}
+.help_x h3{
+	color:#dd5044;
+}
+
+.help_x h4{
+	margin-top:30px;
+	color:#9c56be;
+}
+
+
+.help_x p{
+	font-weight:bold;
+	margin-top:10px;
+	margin-bottom:0px;
+}
+
+#help_x_div1{
+	margin-bottom:20px;
+}
+#help_x_div1 a{
+	margin-bottom:5px;
+}
+
+.pnl_head1{
+	width:40%;
+	display:inline-block;
+}
+
+.pnl_head2{
+	width:40%;
+	display:inline-block;
+}
+
+.pnl_head3{
+	width:15%;
+	margin-left:auto;
+	display:inline-block;
+	text-align:right;
+}
+
+.line-left{
+	display:inline-block;
+	width:30%;
+	margin-right:auto;
+}
+
+
+.line-middle{
+	display:inline-block;
+	width:39%;
+	height:10px;
+}
+
+.line-right{
+	display:inline-block;
+	width:30%;
+	text-align:right;
+}
+
+
+.btn-circle {
+width: 30px;
+height: 30px;
+text-align: center;
+padding: 6px 0;
+font-size: 12px;
+line-height: 1.428571429;
+border-radius: 15px;
+}
+.btn-circle.btn-lg {
+width: 50px;
+height: 50px;
+padding: 10px 16px;
+font-size: 18px;
+line-height: 1.33;
+border-radius: 25px;
+}
+.btn-circle.btn-xl {
+width: 70px;
+height: 70px;
+padding: 10px 16px;
+font-size: 24px;
+line-height: 1.33;
+border-radius: 35px;
+}
+
+/* Cake PHPのエラーメッセージ用 */
+.error-message{
+	color:#de5347;
+}
+
+
+/* テーブル型入力フォームのＳＰ版（スマホ） */
+.tbl_sp{
+	display:block;
+	width:100%;
+}
+.tbl_sp thead{
+	display:none;
+}
+.tbl_sp tbody{
+	display:block;
+	width:100%;
+}
+.tbl_sp tr{
+	display:block;
+	width:100%;
+}
+.tbl_sp td{
+	display:block;
+	width:100%;
+}
+.tbl_sp  td:last-child{
+	padding-bottom:6px;
+}
+.tbl_sp input[type="text"]{
+	width:100%;
+}
+.tbl_sp textarea{
+	width:100%;
+}
+
+/* テーブル変形 */
+.table_transform{
+	border:none;
+	width:100%;
+}
+.table_transform thead{
+	display:none;
+}
+.table_transform tbody tr{
+	display:block;
+	border-bottom:solid #2c2255 1px;
+}
+.table_transform tbody tr td{
+	display:block;
+	border:none;
+}
+

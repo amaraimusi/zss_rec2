@@ -1,0 +1,51 @@
+@CHARSET "UTF-8";
+
+.cb_func_line{}
+
+.cb_breadcrumbs{
+	display:inline-block;
+}
+.cb_kj_main{
+	margin-left:20px;
+	display:inline-block;
+}
+
+.kj_div{
+	display:inline-block;
+	width:auto;
+	height:auto;
+	margin-right:20px;
+	margin-top:4px;
+	margin-bottom:4px;
+}
+
+.cb_kj_detail{
+	background-color:#eeeeee;
+	border-radius:5px;
+	padding:10px;
+	
+}
+
+#cb_func_btns{
+	margin-left:20px;
+	display:inline-block;
+}
+
+.hr_purple{
+	border-top: solid 1px #9954bb;
+}
+
+#clm_cbs_rap{
+	margin-top: 10px;
+	margin-bottom: 30px;
+	border-top: solid 1px #9954bb;
+	padding: 4px;
+}
+
+
+#clm_cbs_rap p{
+	color:#9954bb;
+}
+
+
+
