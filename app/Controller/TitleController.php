@@ -148,7 +148,7 @@ class TitleController extends CrudBaseController {
 		$this->setCommon();//当画面系の共通セット
 		$this->set(array(
 				'header' => 'front_a_header',
-				'title_for_layout'=>'タイトル',
+				'title_for_layout'=>'ZSS REC:タイトル',
 				'data'=> $data,
 		));
 		

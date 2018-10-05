@@ -35,7 +35,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 </div>
 
 <!-- 一覧テーブル -->
-<table id="title_tbl" border="1"  class="table_transform">
+<table id="title_tbl"  class="table">
 
 <thead>
 <tr>
@@ -47,10 +47,6 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	<th>公開</th>
 	<th>順番</th>
 	<th>無効フラグ</th>
-	<th>更新者</th>
-	<th>IPアドレス</th>
-	<th>生成日時</th>
-	<th>更新日時</th>
 
 	<!-- CBBXE -->
 </tr>
@@ -73,10 +69,6 @@ foreach($data as $i=>$ent){
 	$this->FrontA->tdPlain($ent,'public_flg');
 	$this->FrontA->tdPlain($ent,'sort_no');
 	$this->FrontA->tdPlain($ent,'delete_flg');
-	$this->FrontA->tdStr($ent,'update_user');
-	$this->FrontA->tdStr($ent,'ip_addr');
-	$this->FrontA->tdPlain($ent,'created');
-	$this->FrontA->tdPlain($ent,'modified');
 
 	// CBBXE
 	

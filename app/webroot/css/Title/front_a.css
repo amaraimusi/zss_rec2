@@ -21,41 +21,7 @@ h1{
 	color:#809ac2;
 }
 
-/* テーブル変形 */
-.table_transform{
-	border:none;
-	width:100%;
-}
-.table_transform thead{
-	display:none;
-}
-.table_transform tbody tr{
-	display:block;
-	clear:both;
-	border-top:dashed #cccccc 1px;
-	margin-bottom:20px;
-}
 
-.td_line{
-	color:#414141;
-	display:inline-block;
-	margin-left:4px;
-	border:none;
-	font-style:italic;
-	color:#697581;
-}
-.td_image{
-	float:left;
-	display:block;
-	border:none;
-	margin:10px;
-}
-.td_note{
-	display:block;
-	border:none;
-	font-size:1.2em;
-	padding:10px;
-}
 
 footer{
 	margin-top:100px;
