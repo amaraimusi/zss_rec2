@@ -11,7 +11,7 @@ App::uses('AppController', 'Controller');
 class CrudBaseController extends AppController {
 
 	///バージョン
-	var $version = "2.4.1";
+	var $version = "2.4.2";
 
 	///デフォルトの並び替え対象フィールド
 	var $defSortFeild='sort_no';
@@ -335,7 +335,6 @@ class CrudBaseController extends AppController {
 		$this->Session->delete($err_ses_key);
 		$this->Session->delete($page_ses_key);
 		$this->Session->delete($kjs_ses_key);
-		$this->Session->delete($svkj_ses_key);
 		$this->Session->delete($csv_ses_key);
 		$this->Session->delete($mains_ses_key);
 		$this->Session->delete($ini_cnds_ses_key);

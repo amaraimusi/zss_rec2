@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+#title_tbl{
+	/* Edgeのth幅指定不能防止 */
+	table-layout: fixed;
+}
+
+#title_tbl thead .note{
+	width:200px;
+}
