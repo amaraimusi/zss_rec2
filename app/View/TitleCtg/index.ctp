@@ -1,14 +1,14 @@
 <?php
-$this->CrudBase->init(array('model_name'=>'Title'));
+$this->CrudBase->init(array('model_name'=>'TitleCtg'));
 
 // CSSファイルのインクルード
 $cssList = $this->CrudBase->getCssList();
-$cssList[] = 'Title/index'; // 当画面専用CSS
+$cssList[] = 'TitleCtg/index'; // 当画面専用CSS
 $this->assign('css', $this->Html->css($cssList));
 
 // JSファイルのインクルード
 $jsList = $this->CrudBase->getJsList();
-$jsList[] = 'Title/index'; // 当画面専用JavaScript
+$jsList[] = 'TitleCtg/index'; // 当画面専用JavaScript
 $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 
 ?>
@@ -24,15 +24,15 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	<div class="cb_breadcrumbs">
 	<?php
 		$this->Html->addCrumb("トップ",'/');
-		$this->Html->addCrumb("タイトル画面");
+		$this->Html->addCrumb("タイトルカテゴリ画面");
 		echo $this->Html->getCrumbs(" > ");
 	?>
 	</div>
 	
 	<div class="cb_kj_main">
 		<!-- 検索条件入力フォーム -->
-		<?php echo $this->Form->create('Title', array('url' => true )); ?>
-		<?php $this->CrudBase->inputKjMain($kjs,'kj_main','',null,'タイトル名前、タイトル日、備考を検索する');?>
+		<?php echo $this->Form->create('TitleCtg', array('url' => true )); ?>
+		<?php $this->CrudBase->inputKjMain($kjs,'kj_main','',null,'タイトルカテゴリ名前、タイトルカテゴリ日、備考を検索する');?>
 		<?php echo $this->Form->submit('検索', array('name' => 'search','class'=>'btn btn-success','div'=>false,));?>
 		
 		<div class="btn-group">
@@ -46,10 +46,8 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 		
 		// --- CBBXS-1004
 		$this->CrudBase->inputKjId($kjs);
-		$this->CrudBase->inputKjText($kjs,'kj_title_name','タイトル');
-		$this->CrudBase->inputKjSelect($kjs,'kj_title_ctg_id','タイトルカテゴリ',$titleCtgIdList); 
+		$this->CrudBase->inputKjText($kjs,'kj_title_ctg_name','タイトルカテゴリ');
 		$this->CrudBase->inputKjText($kjs,'kj_note','備考');
-		$this->CrudBase->inputKjText($kjs,'kj_public_flg','公開');
 		$this->CrudBase->inputKjHidden($kjs,'kj_sort_no');
 		$this->CrudBase->inputKjDeleteFlg($kjs);
 		$this->CrudBase->inputKjText($kjs,'kj_update_user','更新者');
@@ -86,9 +84,9 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 			<span class="glyphicon glyphicon-plus-sign" title="新規入力"></span></button>
 		
 	</div>
+		
+	<a href="title_ctg/front_a?row_limit=10" class="btn btn-info btn-xs" target="blank" >フロント画面</a>
 	
-	<a href="title/front_a?row_limit=10" class="btn btn-info btn-xs" target="blank" >フロント画面</a>
-	<a href="title_ctg" class="btn btn-info btn-xs">タイトルカテゴリ</a>	
 </div><!-- cb_func_line -->
 
 <div style="clear:both"></div>
@@ -105,7 +103,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 <?php 
 	echo $this->element('CrudBase/crud_base_index');
 	
-	$csv_dl_url = $this->html->webroot . 'title/csv_download';
+	$csv_dl_url = $this->html->webroot . 'title_ctg/csv_download';
 	$this->CrudBase->makeCsvBtns($csv_dl_url);
 ?>
 
@@ -121,7 +119,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 
 <div id="crud_base_auto_save_msg" style="height:20px;" class="text-success"></div>
 <!-- 一覧テーブル -->
-<table id="title_tbl" border="1"  class="table table-striped table-bordered table-condensed">
+<table id="title_ctg_tbl" border="1"  class="table table-striped table-bordered table-condensed">
 
 <thead>
 <tr>
@@ -145,10 +143,8 @@ foreach($data as $i=>$ent){
 	echo "<tr id=i{$ent['id']}>";
 	// CBBXS-1005
 	$this->CrudBase->tdId($ent,'id',array('checkbox_name'=>'pwms'));
-	$this->CrudBase->tdStr($ent,'title_name');
-	$this->CrudBase->tdList($ent,'title_ctg_id',$titleCtgIdList);
+	$this->CrudBase->tdStr($ent,'title_ctg_name');
 	$this->CrudBase->tdNote($ent,'note');
-	$this->CrudBase->tdPlain($ent,'public_flg');
 	$this->CrudBase->tdPlain($ent,'sort_no');
 	$this->CrudBase->tdDeleteFlg($ent,'delete_flg');
 	$this->CrudBase->tdStr($ent,'update_user');
@@ -205,23 +201,14 @@ foreach($data as $i=>$ent){
 	<table><tbody>
 
 		<!-- CBBXS-1006 -->
-		<tr><td>タイトル: </td><td>
-			<input type="text" name="title_name" class="valid" value=""  maxlength="255" title="255文字以内で入力してください" />
-			<label class="text-danger" for="title_name"></label>
-		</td></tr>
-
 		<tr><td>タイトルカテゴリ: </td><td>
-			<?php $this->CrudBase->selectX('title_ctg_id',null,$titleCtgIdList,null);?>
-			<label class="text-danger" for="title_ctg_id"></label>
+			<input type="text" name="title_ctg_name" class="valid" value=""  maxlength="255" title="255文字以内で入力してください" />
+			<label class="text-danger" for="title_ctg_name"></label>
 		</td></tr>
 
 		<tr><td>備考： </td><td>
 			<textarea name="note" ></textarea>
 			<label class="text-danger" for="note"></label>
-		</td></tr>
-		<tr><td>公開: </td><td>
-			<input type="text" name="public_flg" class="valid" value=""  pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-			<label class="text-danger" for="public_flg"></label>
 		</td></tr>
 
 		<!-- CBBXE -->
@@ -262,23 +249,14 @@ foreach($data as $i=>$ent){
 		<tr><td>ID: </td><td>
 			<span class="id"></span>
 		</td></tr>
-		<tr><td>タイトル: </td><td>
-			<input type="text" name="title_name" class="valid" value=""  maxlength="255" title="255文字以内で入力してください" />
-			<label class="text-danger" for="title_name"></label>
-		</td></tr>
-
 		<tr><td>タイトルカテゴリ: </td><td>
-			<?php $this->CrudBase->selectX('title_ctg_id',null,$titleCtgIdList,null);?>
-			<label class="text-danger" for="title_ctg_id"></label>
+			<input type="text" name="title_ctg_name" class="valid" value=""  maxlength="255" title="255文字以内で入力してください" />
+			<label class="text-danger" for="title_ctg_name"></label>
 		</td></tr>
 
 		<tr><td>備考： </td><td>
 			<textarea name="note"></textarea>
 			<label class="text-danger" for="note"></label>
-		</td></tr>
-		<tr><td>公開: </td><td>
-			<input type="text" name="public_flg" class="valid" value=""  pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-			<label class="text-danger" for="public_flg"></label>
 		</td></tr>
 		<tr><td>削除：<input type="checkbox" name="delete_flg" class="valid"  /> </td><td></td></tr>
 
@@ -327,8 +305,8 @@ foreach($data as $i=>$ent){
 		</td></tr>
 		
 
-		<tr><td>タイトル名: </td><td>
-			<span class="title_name"></span>
+		<tr><td>タイトルカテゴリ名: </td><td>
+			<span class="title_ctg_name"></span>
 		</td></tr>
 		
 		<tr><td>画像ファイル: </td><td>
@@ -382,8 +360,8 @@ foreach($data as $i=>$ent){
 		</td></tr>
 		
 
-		<tr><td>タイトル名: </td><td>
-			<span class="title_name"></span>
+		<tr><td>タイトルカテゴリ名: </td><td>
+			<span class="title_ctg_name"></span>
 		</td></tr>
 
 
@@ -417,7 +395,6 @@ foreach($data as $i=>$ent){
 <div style="display:none">
 	
 	<!-- CBBXS-1022 -->
-	<input id="title_ctg_id_json" type="hidden" value='<?php echo $title_ctg_id_json; ?>' />
 
 	<!-- CBBXE -->
 </div>
