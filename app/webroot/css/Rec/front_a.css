@@ -49,12 +49,23 @@ h1{
 	display:block;
 	border:none;
 	margin:10px;
+	text-align:right;
 }
 .td_note{
 	display:block;
 	border:none;
 	font-size:1.2em;
 	padding:10px;
+}
+.td_sub_img_list{
+	display:block;
+	border:none;
+	margin:10px;
+}
+.td_sub_img_list div{
+	margin-right:10px;
+	float:left;
+	text-align:right;
 }
 
 

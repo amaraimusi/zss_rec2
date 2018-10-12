@@ -21,20 +21,11 @@ App::uses('Component', 'Controller');
  */
 class CbFileUploadComponent extends Component{
 	
-	private $dptData; // ディレクトリパステンプレート情報    directory path template data
 
-	
 	
 	public function __construct($collection){
 		parent::__construct($collection);
-		
-		// ディレクトリパステンプレート情報
-		$this->dptData = array(
-				'orig_dp_tmpl' => 'rsc/img/%field/orig/',
-				'thum1_dp_tmpl' => 'rsc/img/%field/thum/',
-				'thum2_dp_tmpl' => 'rsc/img/%field/mid/',
-		);
-		
+
 	}
 	/**
 	 * アップロードファイル名を変換する。
@@ -156,20 +147,19 @@ class CbFileUploadComponent extends Component{
 	/**
 	 * 一括作業
 	 * @param string $form_type フォーム種別  new_inp,edit,eliminate
+	 * @param string $dp_tmpl リソース保存先・ディレクトリパス・テンプレート
+	 * @param array $viaDpFnMap 経由パスマッピング
 	 * @param array $ent 更新エンティティ
 	 * @param array $FILES $_FILES
-	 * @param array $option
-	 * - 				FileUploadK.php::workAllAtOnceのオプション設定
+	 * @param array $option FileUploadK.php::workAllAtOnceのオプション設定
 	 * @return array FileUploadK.php::workAllAtOnceのレスポンス
 	 *
 	 */
-	public function workAllAtOnce($form_type,&$ent,&$FILES,&$option = array()){
+	public function workAllAtOnce($form_type,$dp_tmpl,$viaDpFnMap,&$ent,&$FILES,&$option = array()){
 		
 		$dpDatas = array(); // ファイル保管ディレクトリ情報
 		if(!empty($option['dpDatas'])) $dpDatas = $option['dpDatas'];
-		
 
-		
 		// ファイルアップロード・フィールドリストを取得する(ファイル名が空なら除去するフィルタリングも行う)
 		$fuFields = $this->getFuFields($ent,$FILES);
 		
@@ -185,27 +175,28 @@ class CbFileUploadComponent extends Component{
 			
 			// オリジナルディレクトリパスをセット
 			if(empty($dpData['orig_dp'])){
-				$orig_dp = $this->dptData['orig_dp_tmpl'];
-				$orig_dp = str_replace('%field' , $fu_field , $orig_dp );
-				$dpData['orig_dp'] = $orig_dp;
+				
+				// ディレクトリパスを組み立てる
+				$dpData['orig_dp'] = $this->buildDp('orig', $fu_field, $dp_tmpl, $viaDpFnMap, $ent);
+				
 			}
 			
-			// サムネイルディレクトリパス
+			// ▼ サムネイルディレクトリパス関連の処理
 			if(empty($dpData['thums'])){
-				$thum1_dp = $this->dptData['thum1_dp_tmpl'];
-				$thum1_dp = str_replace('%field' , $fu_field , $thum1_dp);
-				$thum2_dp = $this->dptData['thum2_dp_tmpl'];
-				$thum2_dp = str_replace('%field' , $fu_field , $thum2_dp);
+				
+				// サムネイル系のディレクトリパス組み立て
+				$mid_dp = $this->buildDp('mid', $fu_field, $dp_tmpl, $viaDpFnMap, $ent);
+				$thum_dp = $this->buildDp('thum', $fu_field, $dp_tmpl, $viaDpFnMap, $ent);
 				
 				$dpData['thums'] = array(
 						0 => array(
-								'thum_dp' => $thum1_dp,
+								'thum_dp' => $thum_dp,
 								'thum_width' => 64,
 								'thum_height' => 64,
 						),
 						1 => array(
-								'thum_dp' => $thum2_dp,
-								'thum_width' => 320,
+								'thum_dp' => $mid_dp,
+								'thum_width' => 480,
 								'thum_height' => null,
 						),
 				);
@@ -226,14 +217,33 @@ class CbFileUploadComponent extends Component{
 		
 	}
 	
-	
+
 	/**
-	 * ディレクトリパステンプレート情報のGetter
-	 * @reutrn array ディレクトリパステンプレート情報
+	 * ディレクトリパスを組み立てる
+	 * @param string $dn ディレクトリ名
+	 * @parma string $fu_field フィールド
+	 * @param string $dp_tmpl リソース保存先・ディレクトリパス・テンプレート
+	 * @param array $viaDpFnMap
+	 * @param array $ent 経由パスマッピング
+	 * @return string ディレクトリパス
 	 */
-	public function getDptData(){
-		return $this->dptData;
+	private function buildDp($dn, $fu_field, $dp_tmpl, &$viaDpFnMap, &$ent){
+		$dp = $dp_tmpl;
+		$dp = str_replace('%field' , $fu_field , $dp );
+		$dp = str_replace('%dn' , $dn , $dp );
+		
+		// 経由ディレクトリパス部分を置換
+		$via_dp = ''; // 経由ディレクトリパス
+		if(!empty($viaDpFnMap[$fu_field])){
+			$via_dp_field = $viaDpFnMap[$fu_field];
+			$via_dp = $ent[$via_dp_field];
+		}
+		$dp = str_replace('%via_dp' , $via_dp , $dp );
+		$dp = str_replace('//' , '/' , $dp );
+		
+		return $dp;
 	}
+
 	
 	
 

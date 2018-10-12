@@ -12,9 +12,10 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2018-10-2
- * @version 2.5.0
+ * @date 2016-9-21 | 2018-10-11
+ * @version 2.5.5
  * @histroy
+ * 2018-10-9 v2.5.1 経由ディレクトリパスに対応
  * 2018-10-2 v2.5.0 フォームドラッグとリサイズ
  * 2018-9-19 v2.4.5 ファイルアップロード機能：DnDに対応
  * 2018-9-18 v2.4.4 フォームフィット機能を追加
@@ -40,8 +41,9 @@
  *  - form_z_index	重なり順序(cssのz-indexと同じ)
  *  - valid_msg_slt	バリデーションメッセージセレクタ
  *  - auto_close_flg	自動閉フラグ	0:自動で閉じない（デフォルト）  1:フォームの外側をクリックすると自動的に閉じる
- *  - ni_tr_place	新規入力追加場所フラグ 0:末尾 , 1:先頭
+ *  - ni_tr_place	新規入力追加場所フラグ 0:末尾(デフォルト） , 1:先頭
  *  - drag_and_resize_flg フォームドラッグとリサイズのフラグ 0:OFF , 1:ON(デフォルト)
+ *  
  *  @param array fieldData フィールドデータ（フィールド名の配列。フィード名の順番は列並びと一致していること）
  */
 
@@ -95,6 +97,9 @@ class CrudBase{
 		// CrudBase・ファイルアップロードコンポーネント
 		this.cbFileUploadComp = this._factoryCbFileUploadComponent();
 		
+		// カレンダー日付ピッカー・ラッパーコンポーネン
+		this.datepickerWrap = this._factoryDatepickerWrap();
+		
 		this.fueIdCash; // file要素のid属性データ（キャッシュ）
 		
 		// テーブル変形
@@ -102,6 +107,9 @@ class CrudBase{
 		
 		// フォームをドラッグ移動およびリサイズできるようにする。
 		this._formDragAndResizeSetting();
+		
+		// エラータイプリストによるエラー処理
+		this._errByErrTypes();
 		
 	}
 	
@@ -186,36 +194,36 @@ class CrudBase{
 		
 	}
 
-
-	/**
-	 * ガシェット・コンポーネントのファクトリーメソッド
-	 * @return CrudBaseGadgetKj ガシェット・コンポーネント
-	 */
-	_factoryCrudBaseGadgetKj(){
-		
-		var cbGadgetKj;
-
-		// クラス（JSファイル）がインポートされていない場合、「空」の実装をする。
-		var t = typeof CrudBaseGadgetKj;
-		if(t == null || t == 'undefined'){
-			// 「空」実装
-			cbGadgetKj = {
-					'reset':function(){}
-			}
-			return cbGadgetKj
-		}
-		
-		// 検索条件入力要素にガシェットを組み込む
-		var kjElms = this.getKjElms(); // 検索条件入力要素リストを取得する
-		cbGadgetKj = new CrudBaseGadgetKj(kjElms); // ガシェット管理クラス
-		cbGadgetKj.onGadgetsToElms();// 各検索入力要素にガシェットを組み込み
-		
-		this.datepicker_ja(); // jQuery UIカレンダーを日本語化する
-		jQuery.datetimepicker.setLocale('ja');// 日時ピッカーを日本語化<jquery.datetimepicker.full.min.js>
-
-		return cbGadgetKj;
-
-	}
+// ■■■□□□■■■□□□■■■□□□
+//	/**
+//	 * ガシェット・コンポーネントのファクトリーメソッド
+//	 * @return CrudBaseGadgetKj ガシェット・コンポーネント
+//	 */
+//	_factoryCrudBaseGadgetKj(){
+//		
+//		var cbGadgetKj;
+//
+//		// クラス（JSファイル）がインポートされていない場合、「空」の実装をする。
+//		var t = typeof CrudBaseGadgetKj;
+//		if(t == null || t == 'undefined'){
+//			// 「空」実装
+//			cbGadgetKj = {
+//					'reset':function(){}
+//			}
+//			return cbGadgetKj
+//		}
+//		
+//		// 検索条件入力要素にガシェットを組み込む
+//		var kjElms = this.getKjElms(); // 検索条件入力要素リストを取得する
+//		cbGadgetKj = new CrudBaseGadgetKj(kjElms); // ガシェット管理クラス
+//		cbGadgetKj.onGadgetsToElms();// 各検索入力要素にガシェットを組み込み
+//		
+//		this.datepicker_ja(); // jQuery UIカレンダーを日本語化する
+//		jQuery.datetimepicker.setLocale('ja');// 日時ピッカーを日本語化<jquery.datetimepicker.full.min.js>
+//
+//		return cbGadgetKj;
+//
+//	}
 	
 
 	
@@ -255,6 +263,31 @@ class CrudBase{
 		cbFileUploadComp = new CbFileUploadComponent(fuIds,option);
 		
 		return cbFileUploadComp;
+	}
+	
+	
+	/**
+	 * カレンダー日付ピッカー・ラッパーコンポーネントのファクトリーメソッド
+	 * @return DatepickerWrap カレンダー日付ピッカー・ラッパーコンポーネント
+	 */
+	_factoryDatepickerWrap(){
+		var datepickerWrap;
+		
+		// クラス（JSファイル）がインポートされていない場合、「空」の実装をする。
+		var t = typeof DatepickerWrap;
+		if(t == null || t == 'undefined'){
+			// 「空」実装
+			datepickerWrap = {
+					'tukishomatu':function(){},
+			}
+			return datepickerWrap
+		}
+		
+		// 自動保存機能の初期化
+		datepickerWrap = new DatepickerWrap(this);
+		
+		return datepickerWrap;
+		
 	}
 	
 	/**
@@ -1766,7 +1799,7 @@ class CrudBase{
 		this.entToBinds(tr,ent,'name',option);// エンティティをname属性バインド要素群へセットする
 		
 		// 画像をTR要素に表示する
-		this.cbFileUploadComp.setImageToTr(tr,ent);
+		this.cbFileUploadComp.setImageToTr(tr,ent,this.param.viaDpFnMap);
 	}
 
 	_nl2brEx(v){
@@ -2213,6 +2246,18 @@ class CrudBase{
 		if(param['device_type'] == null){
 			param['device_type'] = this.judgDeviceType(); // デバイスタイプ（PC/SP）の判定
 		}
+
+		// 経由パスマッピング
+		if(param['viaDpFnMap'] == null){
+			var via_dp_fn_json = jQuery('#via_dp_fn_json').val();
+			param['viaDpFnMap'] = jQuery.parseJSON(via_dp_fn_json);
+		}
+
+		// エラータイプリスト
+		if(param['errTypes'] == null){
+			var err_types_json = jQuery('#err_types_json').val();
+			param['errTypes'] = jQuery.parseJSON(err_types_json);
+		}
 		
 		
 		if(param['drag_and_resize_flg'] == null) param['drag_and_resize_flg'] = 1;
@@ -2352,7 +2397,7 @@ class CrudBase{
 			var elms = bindElms[field];
 			for(var e_i in elms){
 				var elm = elms[e_i];
-				this.setValueToElement(elm,field,ent[field],option); // バインド要素リストを取得する
+				this.setValueToElement(elm,field,ent[field],ent,option); // バインド要素リストを取得する
 			}
 		}
 	}
@@ -2426,6 +2471,7 @@ class CrudBase{
 	 * @param elm(string or jQuery object) 要素オブジェクト、またはセレクタ
 	 * @param field フィールド
 	 * @param val1 要素にセットする値
+	 * @param ent エンティティ
 	 * @param option
 	 *  - par 親要素(jQuery object)
 	 *  - form_type フォーム種別
@@ -2433,7 +2479,7 @@ class CrudBase{
 	 *  - disFilData object[フィールド]{フィルタータイプ,オプション} 表示フィルターデータ
 	 *  - dis_fil_flg 表示フィルター適用フラグ 0:OFF(デフォルト) , 1:ON
 	 */
-	setValueToElement(elm,field,val1,option){
+	setValueToElement(elm,field,val1,ent,option){
 		
 		if(!(elm instanceof jQuery)) elm = jQuery(elm);// 要素がjQueryオブジェクトでなければ、jQueryオブジェクトに変換。
 		
@@ -2466,7 +2512,7 @@ class CrudBase{
 			if(typ=='file'){
 
 				// アップロードファイル要素用の入力フォームセッター
-				this._setToFormForFile(option.form_type,option.par,field,val1,option);
+				this._setToFormForFile(option.form_type,option.par,field,val1,ent,option);
 
 			}
 
@@ -2538,6 +2584,7 @@ class CrudBase{
 	 */
 	displayFilter(val1,field,disFilData,xss){
 		
+		
 		 var res = {'val1':val1,'xss':xss};
 
 		if(!disFilData) disFilData = this.param.disFilData;
@@ -2549,8 +2596,11 @@ class CrudBase{
 		
 		switch (filEnt.fil_type) {
 		case 'select':
-			
+
+
 			res.val1 = this.disFilSelect(val1,field,filEnt.option);// 表示フィルター・SELECTリスト
+			
+
 			break;
 			
 		case 'delete_flg':
@@ -2563,6 +2613,7 @@ class CrudBase{
 
 			res.val1 = this.disFilFlg(val1,field,filEnt.option);// 表示フィルター・フラグ
 			res.xss = 0;
+
 			break;
 			
 		case 'money':
@@ -2640,12 +2691,14 @@ class CrudBase{
 	 */
 	disFilFlg(val1,field,option){
 
-		if(val1 == null) return val1;
+		if(val1 == null || val1 == '' || val1 == false) val1 = 0;
+		if(val1 > 0) val1 = 1;
+		var val2 = option.list[val1];
 		
 		if(val1 == 1){
-			return '<span style="color:#23d6e4;">有効</span>';
+			return '<span style="color:#23d6e4;">' + val2 + '</span>';
 		}else{
-			return '<span style="color:#b4b4b4;">無効</span>';
+			return '<span style="color:#b4b4b4;">' + val2 + '</span>';
 		}
 
 	}
@@ -2678,11 +2731,12 @@ class CrudBase{
 	 * @param jQuery form フォーム要素
 	 * @param string field フィールド
 	 * @param variant v 値
+	 * @param ent データのエンティティ
 	 * @param object option editShow(),newInpShowからのoption 
 	 */
-	_setToFormForFile(form_type,form,field,v,option){
+	_setToFormForFile(form_type,form,field,v,ent,option){
 
-		// フィールドに紐づくfile要素のid属性を取得する
+		// ▼フィールドに紐づくfile要素のid属性を取得する
 		var fue_id = null; // file要素のid属性
 		for(var i in this.fieldData){
 			var fEnt = this.fieldData[i];
@@ -2696,14 +2750,17 @@ class CrudBase{
 			}
 		}
 		
-
-
+		// ▼経由ディレクトリパスを取得
+		var via_dp = '';
+		if(this.param.viaDpFnMap[field] != null){
+			var via_dp_field = this.param.viaDpFnMap[field];
+			via_dp = ent[via_dp_field];
+		}
+		
 		// file要素にファイルプレビューを表示する
-		var res = this.cbFileUploadComp.setFilePaths(fue_id,v);
+		var res = this.cbFileUploadComp.setFilePaths(fue_id,v,via_dp);
 		var dpData = res['dpData']
-		
 
-		
 	}
 
 	/**
@@ -3653,31 +3710,7 @@ class CrudBase{
 	}
 	
 
-	/**
-	 * jQuery UIカレンダーを日本語化する
-	 */
-	datepicker_ja(){
-		
-		jQuery.datepicker.regional['ja'] = {
-				closeText: '閉じる',
-				prevText: '<前',
-				nextText: '次>',
-				currentText: '今日',
-				monthNames: ['1月','2月','3月','4月','5月','6月',
-				'7月','8月','9月','10月','11月','12月'],
-				monthNamesShort: ['1月','2月','3月','4月','5月','6月',
-				'7月','8月','9月','10月','11月','12月'],
-				dayNames: ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'],
-				dayNamesShort: ['日','月','火','水','木','金','土'],
-				dayNamesMin: ['日','月','火','水','木','金','土'],
-				weekHeader: '週',
-				dateFormat: 'yy/mm/dd',
-				firstDay: 0,
-				isRTL: false,
-				showMonthAfterYear: true,
-				yearSuffix: '年'};
-			jQuery.datepicker.setDefaults(jQuery.datepicker.regional['ja']);
-	}
+	
 	
 	/**
 	 * FileUploadK | ファイルプレビュー後コールバック
@@ -3766,6 +3799,17 @@ class CrudBase{
 		//リサイズ機能を組み込む
 		form.resizable();
 
+	}
+	
+	/**
+	 * エラータイプリストによるエラー処理
+	 */
+	_errByErrTypes(){
+
+		// 検索条件エラーが存在する場合、詳細検索フォームを表示する
+		if(this.param.errTypes.indexOf('kjs_err') >= 0){
+			jQuery('.cb_kj_detail').show();
+		}
 	}
 	
 	

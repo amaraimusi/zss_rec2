@@ -87,17 +87,6 @@ class TitleController extends CrudBaseController {
 		$title_ctg_id_json = json_encode($titleCtgIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
 		$this->set(array('titleCtgIdList' => $titleCtgIdList,'title_ctg_id_json' => $title_ctg_id_json));
 
-		// CBBXE
-		
-// 		// ■■■□□□■■■□□□■■■□□□テスト
-// 		App::uses('DbExport','Vendor/Wacg');
-// 		App::uses('DaoForCake','Model');
-// 		$dao = new DaoForCake();
-// 		$dbExp = new DbExport();
-// 		$dbExp->test($dao);
-		
-	
-		
 		$this->set($crudBaseData);
 		$this->set(array(
 			'title_for_layout'=>'タイトル',
@@ -209,10 +198,10 @@ class TitleController extends CrudBaseController {
 		$errs = array(); // エラーリスト
 		
 
-// 		// 認証中でなければエラー
-// 		if(empty($this->Auth->user())){
-// 			return 'Error:login is needed.';// 認証中でなければエラー
-// 		}
+		// 認証中でなければエラー
+		if(empty($this->Auth->user())){
+			return 'Error:login is needed.';// 認証中でなければエラー
+		}
 		
 		// 未ログインかつローカルでないなら、エラーアラートを返す。
 		if(empty($this->Auth->user()) && $_SERVER['SERVER_NAME']!='localhost'){
@@ -228,10 +217,6 @@ class TitleController extends CrudBaseController {
 		$regParam = json_decode($reg_param_json,true);
 		$form_type = $regParam['form_type']; // フォーム種別 new_inp,edit,delete,eliminate
 
-
-		// アップロードファイル名を変換する。
-		$ent = $this->convUploadFileName($ent,$_FILES);
-
 		// 更新ユーザーなど共通フィールドをセットする。
 		$ent = $this->setCommonToEntity($ent);
 	
@@ -239,12 +224,8 @@ class TitleController extends CrudBaseController {
 		$this->Title->begin();
 		$ent = $this->Title->saveEntity($ent,$regParam);
 		$this->Title->commit();//コミット
-		
-		// ファイルアップロード関連の一括作業
-		$option = array();
-		$res = $this->workFileUploads($form_type, $ent, $_FILES, $option);
+
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
-		
 		
 		if($errs) $ent['err'] = implode("','",$errs); // フォームに表示するエラー文字列をセット
 

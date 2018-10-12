@@ -56,7 +56,7 @@ foreach($tblList as $i=> $tbl){
  * テーブル名の末尾が"s"なら削る。
  *
  * @param string $tblName テーブル名（例：big_animals)
- * @return モデル名
+ * @return string モデル名
  */
 function convModelName($tblName) {
 	$tblName = strtr($tblName, '_', ' ');

@@ -11,7 +11,7 @@ App::uses('AppController', 'Controller');
 class CrudBaseController extends AppController {
 
 	///バージョン
-	var $version = "2.4.2";
+	var $version = "2.5.1";
 
 	///デフォルトの並び替え対象フィールド
 	var $defSortFeild='sort_no';
@@ -50,6 +50,12 @@ class CrudBaseController extends AppController {
 	
 	// バージョン情報
 	public $verInfo = array();
+	
+	/// リソース保存先・ディレクトリパス・テンプレート
+	public $dp_tmpl = 'rsc/img/%field/%via_dp/%dn/';
+	
+	/// 経由パスマッピング
+	public $viaDpFnMap = array();
 	
 	public $components = ['CbFileUpload']; // ファイルアップロードコンポーネント [CakePHPの機能]
 	
@@ -147,13 +153,13 @@ class CrudBaseController extends AppController {
 		//検索条件情報をPOST,GET,デフォルトのいずれから取得。
 		$kjs=$this->getKjs($name);
 
-		//パラメータのバリデーション
-		$errMsg=$this->valid($kjs,$this->kjs_validate);
-
-		//入力エラーがあった場合。
-		if(isset($errMsg)){
+		// 検索条件情報のバリデーション
+		$errTypes = array();
+		$errMsg = $this->valid($kjs,$this->kjs_validate);
+		if(isset($errMsg)){//入力エラーがあった場合。
 			//再表示用の検索条件情報をSESSION,あるいはデフォルトからパラメータを取得する。
 			$kjs= $this->getKjsSD($name);
+			$errTypes[] = 'kjs_err';
 		}
 		
 		//検索ボタンが押された場合
@@ -209,10 +215,11 @@ class CrudBaseController extends AppController {
 		
 		$sql_dump_flg = $option['sql_dump_flg']; // SQLダンプフラグ   true:SQLダンプを表示（デバッグモードである場合） , false:デバッグモードであってもSQLダンプを表示しない。
 		
-		// ファイルアップロード用のディレクトリパステンプレート情報
-		$dptData = array();
-		if($option['func_file_upload']) $dptData = $this->CbFileUpload->getDptData();
+		// 経由パスマッピングJSON
+		$via_dp_fn_json = json_encode($this->viaDpFnMap,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
 		
+		// エラータイプJSON
+		$err_types_json = json_encode($errTypes,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
 		
 		$crudBaseData = array(
 				'field_data'=>$active, // アクティブフィールドデータ
@@ -220,6 +227,8 @@ class CrudBaseController extends AppController {
 				'kjs_json'=>$kjs_json, // 検索条件JSON
 				'def_kjs_json'=>$def_kjs_json, // デフォルト検索情報JSON
 				'errMsg'=>$errMsg, // エラーメッセージ
+				'errTypes' => $errTypes, // エラータイプ
+				'err_types_json' => $err_types_json, // エラータイプJSON
 				'version'=>$this->version, // CrudBaseのバージョン
 				'userInfo'=>$userInfo, // ユーザー情報
 				'new_version_chg'=>$new_version_chg, // 新バージョン変更フラグ: 0:通常  ,  1:新バージョンに変更
@@ -231,7 +240,9 @@ class CrudBaseController extends AppController {
 				'pages'=>$pages, // ページネーションパラメータ
 				'act_flg'=>$act_flg, // アクティブフラグ	null:初期表示 , 1:検索アクション , 2:ページネーションアクション , 3:列ソートアクション
 				'sql_dump_flg'=>$sql_dump_flg, // SQLダンプフラグ
-				'dptData' => $dptData, // ファイルアップロード用のディレクトリパステンプレート情報
+				'dp_tmpl' => $this->dp_tmpl, // リソース保存先・ディレクトリパス・テンプレート
+				'viaDpFnMap' => $this->viaDpFnMap , // 経由パスマッピング
+				'via_dp_fn_json' => $via_dp_fn_json, // 経由パスマッピングJSON
 		);
 		
 		
@@ -1749,15 +1760,17 @@ class CrudBaseController extends AppController {
 	/**
 	 * ファイルアップロード関連の一括作業
 	 * @param string $form_type フォーム種別  new_inp,edit,eliminate
+	 * @param string $dp_tmpl リソース保存先・ディレクトリパス・テンプレート
+	 * @param array $viaDpFnMap 経由パスマッピング
 	 * @param array $ent 更新エンティティ
 	 * @param array $FILES $_FILES
 	 * @param array $option
 	 * - FileUploadK.phpのオプション設定
 	 *
 	 */
-	protected function workFileUploads($form_type,&$ent,&$FILES,&$option){
+	protected function workFileUploads($form_type,$dp_tmpl,$viaDpFnMap,&$ent,&$FILES,$option = array()){
 		
-			return $this->CbFileUpload->workAllAtOnce($form_type,$ent,$FILES,$option);
+		return $this->CbFileUpload->workAllAtOnce($form_type,$dp_tmpl,$viaDpFnMap,$ent,$FILES,$option);
 	}
 	
 	
@@ -1866,14 +1879,5 @@ class CrudBaseController extends AppController {
 		return false;
 	}
 	
-	
-	
-	/**
-	 * ファイルアップロード用のディレクトリパステンプレート情報を取得
-	 * @return array ディレクトリパステンプレート情報
-	 */
-	public function getDptData(){
-		return $this->CbFileUpload->getDptData();
-	}
 
 }

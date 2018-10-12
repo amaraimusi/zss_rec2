@@ -12,8 +12,8 @@
  * - ページネーション情報としてページ目次、ソート用リンク、データ件数等を出力する。
  * 
  * @author k-uehara
- * @version 1.5.2 
- * @date 2010-4-1 | 2018-10-5
+ * @version 1.5.3 
+ * @date 2010-4-1 | 2018-10-10
  *
  */
 class PagenationForCake{
@@ -55,6 +55,8 @@ class PagenationForCake{
 		$pages['page_next_link'] = $res['page_next_link'];
 		$pages['page_top_link'] = $res['page_top_link'];
 		$pages['page_last_link'] = $res['page_last_link'];
+		$pages['query_str'] = $res['query_str'];
+		
 		$pages['sorts']=$sorts;
 		$pages['page_no']=$pages['page_no'];//現在ページ
 		$pages['all_data_cnt']=$all_data_cnt;//全データ数
@@ -159,7 +161,7 @@ class PagenationForCake{
 		$params['row_limit']=$row_limit_cnt;
 		$params['sort_field']=$pages['sort_field'];
 		$params['sort_desc']=$pages['sort_desc'];
-
+		
 		//ページ目次用のHTMLコードを生成する。
 		$res=$this->_createIndexHtml($page_no,$params,$all_data_cnt,$row_limit_cnt,$midasi_cnt,$path,$kjs_uq);
 
@@ -272,12 +274,16 @@ class PagenationForCake{
 		$html.="{$nextMax}&nbsp;\n";
 		$html.="</div>\n";
 		
+		// クエリ文字列
+		$query_str = "page_no=0{$strParams}&{$kjs_uq}";
+		
 		$res=array(
 				'mokuji'=>$html,
 				'page_prev_link'=>$page_prev_link,
 				'page_next_link'=>$page_next_link,
 				'page_top_link'=>$page_top_link,
 				'page_last_link'=>$page_last_link,
+				'query_str'=>$query_str,
 				
 		);
 

@@ -3,9 +3,10 @@
 /**
  * CrudBaseのロジッククラス
  * 
- * @version 2.2.0
- * @date 2016-1-21 | 2018-10-3
+ * @version 2.3.0
+ * @date 2016-1-21 | 2018-10-8
  * @history
+ * 2018-10-8 v2.2.0 アップロードファイル関連の大幅修正
  * 2018-10-3 v2.2.0 アップロードファイルの抹消処理を追加
  * 2016-1-21 v1.0.0 新規作成
  * 
@@ -477,9 +478,11 @@ class CrudBase{
 	 * @param Model $model モデル
 	 * @param int $id
 	 * @param string $fn_field_strs ファイルフィールド群文字列（複数ある場合はコンマで連結）
-	 * @param array $dtpData ディレクトリパステンプレート情報
+	 * @param array $ent エンティティ
+	 * @param string $dp_tmpl ディレクトリパス・テンプレート
+	 * @param string $viaDpFnMap 中継パスマッピング
 	 */
-	public function eliminateFiles(&$model,$id,$fn_field_strs,&$dtpData){
+	public function eliminateFiles(&$model,$id,$fn_field_strs, &$ent, $dp_tmpl, $viaDpFnMap){
 
 		// モデルと紐づいているテーブルからidに紐づくレコードを取得する。
 		$tbl_name = $model->useTable;
@@ -505,11 +508,13 @@ class CrudBase{
 			
 			// ▼削除データにファイルパスリストをセットする。
 			$fps = array();
-			foreach($dtpData as $dtp){
-				$fp = str_replace('%field', $fn_field, $dtp);
-				$fp .= $fn;
-				$fps[] = $fp;
-			}
+			
+			// ▼ ファイルパスを組み立てる
+			$fps['orig'] = $this->buildFp('orig', $fn_field, $ent, $dp_tmpl, $viaDpFnMap);
+			$fps['mid'] = $this->buildFp('mid', $fn_field, $ent, $dp_tmpl, $viaDpFnMap);
+			$fps['thum'] = $this->buildFp('thum', $fn_field, $ent, $dp_tmpl, $viaDpFnMap);
+			
+
 			$delEnt['fps'] = $fps;
 			
 			// ▼削除するファイル名が他のレコードで使われていないなら抹消フラグをONにする。使われているならfalseにする。
@@ -527,7 +532,7 @@ class CrudBase{
 		
 		// ▼削除データをループし、抹消フラグがfalseでないならファイル抹消を行う。
 		foreach($delData as $delEnt){
-			if($delEnt['eliminate_flg'] == false) continue;
+			if(empty($delEnt['eliminate_flg'])) continue;
 			
 			// ▼ファイルパスリストをループし、ファイルパスに紐づくファイルを削除する。
 			$fps = $delEnt['fps'];
@@ -537,6 +542,35 @@ class CrudBase{
 			 
 		}
 
+	}
+	
+	/**
+	 * ファイルパスを組み立てる
+	 * @param string $dn ディレクトリ名
+	 * @param string $fn_field フィールド
+	 * @param array $ent データのエンティティ
+	 * @param string $dp_tmpl ディレクトリパス・テンプレート
+	 * @param array $viaDpFnMap 中継パスマッピング
+	 * @return string ファイルパス
+	 */
+	private function buildFp($dn, $fn_field, &$ent, $dp_tmpl, &$viaDpFnMap){
+
+		$fp = $dp_tmpl . $ent[$fn_field];
+		
+		$fp = str_replace('%field', $fn_field, $fp);
+		$fp = str_replace('%dn', $dn, $fp);
+		
+		// 経由ディレクトリパス部分を置換
+		$via_dp = ''; // 経由ディレクトリパス
+		if(!empty($viaDpFnMap[$fn_field])){
+			$via_dp_field = $viaDpFnMap[$fn_field];
+			$via_dp = $ent[$via_dp_field];
+		}
+		$fp = str_replace('%via_dp' , $via_dp , $fp );
+		$fp = str_replace('//' , '/' , $fp );
+		
+		
+		return $fp;
 	}
 	
 	

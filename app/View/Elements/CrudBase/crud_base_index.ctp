@@ -4,7 +4,8 @@
 	$this->CrudBase->setCrudBaseParam(array(
 			'bigDataFlg'=>$bigDataFlg,
 			'debug_mode'=>$debug_mode,
-			'dptData'=>$dptData,
+			'dp_tmpl'=>$dp_tmpl,
+			'viaDpFnMap'=>$viaDpFnMap,
 	));
 	
 	$this->CrudBase->setKjs($kjs);

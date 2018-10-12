@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+#rec_ctg_tbl{
+	/* Edgeのth幅指定不能防止 */
+	table-layout: fixed;
+}
+
+#rec_ctg_tbl thead .note{
+	width:200px;
+}

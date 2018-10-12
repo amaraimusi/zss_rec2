@@ -8,8 +8,8 @@ App::uses('PagenationForCake', 'Vendor/Wacg');
  * @note
  * ユーザー管理画面ではユーザー管理一覧を検索閲覧、編集など多くのことができます。
  * 
- * @date 2015-9-16 | 2018-4-25 削除のバグを主末井
- * @version 3.0.1
+ * @date 2015-9-16 | 2018-10-9
+ * @version 3.0.2
  *
  */
 class UserMngController extends CrudBaseController {
@@ -197,7 +197,7 @@ class UserMngController extends CrudBaseController {
 		
 		$regMsg="<p id='reg_msg'>更新しました。</p>";
 
-		//オリジナルバリデーション■■■□□□■■■□□□■■■□□□
+		//オリジナルバリデーション
 		//$xFlg=$this->validUserMng();
 		$xFlg=true;
 		if($xFlg==false){

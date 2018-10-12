@@ -9,18 +9,23 @@ var crudBase;//AjaxによるCRUD
 var pwms; // ProcessWithMultiSelection.js | 一覧のチェックボックス複数選択による一括処理
 
 /**
- *  ユーザー管理画面の初期化
+ *  ネコ画面の初期化
  * 
   * ◇主に以下の処理を行う。
  * - 日付系の検索入力フォームにJQueryカレンダーを組み込む
  * - 列表示切替機能の組み込み
  * - 数値範囲系の検索入力フォームに数値範囲入力スライダーを組み込む
  * 
- * @version 1.2
- * @date 2015-9-16 | 2016-12-14
+ * @version 1.2.2
+ * @date 2015-9-16 | 2018-9-8
  * @author k-uehara
  */
 function init(){
+	
+	// CakePHPによるAjax認証
+	var alwc = new AjaxLoginWithCake();
+	var alwcParam = {'btn_type':0,'form_slt':'#ajax_login_with_cake'}
+	alwc.loginCheckEx(alwcParam);
 	
 	// 検索条件情報を取得する
 	var kjs_json = jQuery('#kjs_json').val();
@@ -28,7 +33,7 @@ function init(){
 	
 	//AjaxによるCRUD
 	crudBase = new CrudBase({
-			'src_code':'user_mng', // 画面コード（スネーク記法)
+			'src_code':'neko', // 画面コード（スネーク記法)
 			'kjs':kjs,
 			'ni_tr_place':1,
 		});
@@ -38,17 +43,22 @@ function init(){
 	// 表示フィルターデータの定義とセット
 	var disFilData = {
 			// CBBXS-1008
-
+			'neko_val':{
+				'fil_type':'money',
+				'option':{'currency':'&yen;'}
+			},
+			'delete_flg':{
+				'fil_type':'delete_flg',
+			},
 			// CBBXE
 			
 	};
 	
 	// CBBXS-1023
-	// 権限リストJSON
-	var role_json = jQuery('#role_json').val();
-	var roleList = JSON.parse(role_json);
-	disFilData['role'] ={'fil_type':'select','option':{'list':roleList}};
-
+	// ネコグループリストJSON
+	var neko_group_json = jQuery('#neko_group_json').val();
+	var nekoGroupList = JSON.parse(neko_group_json);
+	disFilData['neko_group'] ={'fil_type':'select','option':{'list':nekoGroupList}};
 	// CBBXE
 
 	
@@ -62,8 +72,8 @@ function init(){
 
 	// 一覧のチェックボックス複数選択による一括処理
 	pwms = new ProcessWithMultiSelection({
-		'tbl_slt':'#user_mng_tbl',
-		'ajax_url':'user_mng/ajax_pwms',
+		'tbl_slt':'#neko_tbl',
+		'ajax_url':'neko/ajax_pwms',
 			});
 
 	// 新規入力フォームのinput要素にEnterキー押下イベントを組み込む。
@@ -83,10 +93,10 @@ function init(){
 	
 	// 日付カレンダーのセット
 	// CBBXS-1030
-
+	$("#new_inp_neko_date").datepicker({dateFormat:'yy-mm-dd'});
+	$("#edit_neko_date").datepicker({dateFormat:'yy-mm-dd'});
 	// CBBXE
 	
-
 }
 
 /**
@@ -102,17 +112,12 @@ function newInpShow(btnElm){
  * @param btnElm ボタン要素
  */
 function editShow(btnElm){
-	crudBase.editShow(btnElm);
 	
-	// パスワード変更ボタンを表示
-	jQuery("#chg_pw_btn").show();
-	
-	// パスワードテキストボックスを中身をクリアしｔから表示する
-	var epTxtElm = jQuery("#edit_password");
-	epTxtElm.val('');
-	epTxtElm.hide();
-	
+	var option = {};
+	crudBase.editShow(btnElm,option);
 }
+
+
 
 /**
  * 複製フォームを表示（新規入力フォームと同じ）
@@ -190,7 +195,7 @@ function resetKjs(exempts){
 function moveClmSorter(){
 	
 	//列並替画面に遷移する <CrudBase:index.js>
-	moveClmSorterBase('user_mng');
+	moveClmSorterBase('neko');
 	
 }
 
@@ -274,14 +279,12 @@ function session_clear(){
 }
 
 /**
- * パスワード変更ボタンをクリック
+ * テーブル変形
+ * @param mode_no モード番号  0:テーブルモード , 1:区分モード
  */
-function chgPwBtnClick(){
-	jQuery("#chg_pw_btn").hide();
-	
-	// パスワードテキストボックスを中身をクリアしｔから表示する
-	var epTxtElm = jQuery("#edit_password");
-	epTxtElm.val('');
-	epTxtElm.show();
+function tableTransform(mode_no){
+
+	crudBase.tableTransform(mode_no);
+
 }
 

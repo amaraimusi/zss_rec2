@@ -3,28 +3,28 @@ App::uses('CrudBaseController', 'Controller');
 App::uses('PagenationForCake', 'Vendor/Wacg');
 
 /**
- * タイトルカテゴリ
+ * ネコ
  * 
  * @note
- * タイトルカテゴリ画面ではタイトルカテゴリ一覧を検索閲覧、編集など多くのことができます。
+ * ネコ画面ではネコ一覧を検索閲覧、編集など多くのことができます。
  * 
- * @date 2015-9-16 | 2018-10-4 フロントAページ追加
- * @version 3.2.0
+ * @date 2015-9-16 | 2018-10-8
+ * @version 3.2.1
  *
  */
-class TitleCtgController extends CrudBaseController {
+class NekoController extends CrudBaseController {
 
 	/// 名称コード
-	public $name = 'TitleCtg';
+	public $name = 'Neko';
 	
 	/// 使用しているモデル[CakePHPの機能]
-	public $uses = array('TitleCtg','CrudBase');
+	public $uses = array('Neko','CrudBase');
 	
 	/// オリジナルヘルパーの登録[CakePHPの機能]
 	public $helpers = array('CrudBase');
 
 	/// デフォルトの並び替え対象フィールド
-	public $defSortFeild='TitleCtg.sort_no';
+	public $defSortFeild='Neko.sort_no';
 	
 	/// デフォルトソートタイプ	  0:昇順 1:降順
 	public $defSortType=0;
@@ -45,7 +45,14 @@ class TitleCtgController extends CrudBaseController {
 	public $edit_validate = array();
 	
 	// 当画面バージョン (バージョンを変更すると画面に新バージョン通知とクリアボタンが表示されます。）
-	public $this_page_version = '1.9.1'; 
+	public $this_page_version = '1.9.1'; 	/// リソース保存先・ディレクトリパス・テンプレート
+	
+	/// リソース保存先・ディレクトリパス・テンプレート
+	public $dp_tmpl = 'rsc/img/%field/%via_dp/%dn/';
+	
+	/// 経由パスマッピング
+	public $viaDpFnMap = array(); // 例　'img_fn'=>'img_via_dp'
+	//public $viaDpFnMap = array('img_fn'=>'neko_group');
 
 
 
@@ -65,24 +72,30 @@ class TitleCtgController extends CrudBaseController {
 	/**
 	 * indexページのアクション
 	 *
-	 * indexページではタイトルカテゴリ一覧を検索閲覧できます。
+	 * indexページではネコ一覧を検索閲覧できます。
 	 * 一覧のidから詳細画面に遷移できます。
 	 * ページネーション、列名ソート、列表示切替、CSVダウンロード機能を備えます。
 	 */
 	public function index() {
 		
 		// CrudBase共通処理（前）
-		$crudBaseData = $this->indexBefore('TitleCtg');//indexアクションの共通先処理(CrudBaseController)
+		$crudBaseData = $this->indexBefore('Neko');//indexアクションの共通先処理(CrudBaseController)
 		
 		//一覧データを取得
-		$data = $this->TitleCtg->findData($crudBaseData);
+		$data = $this->Neko->findData($crudBaseData);
 
 		// CrudBase共通処理（後）
 		$crudBaseData = $this->indexAfter($crudBaseData);//indexアクションの共通後処理
-
+		
+		// CBBXS-1020
+		$nekoGroupList = $this->Neko->getNekoGroupList();
+		$neko_group_json = json_encode($nekoGroupList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
+		$this->set(array('nekoGroupList' => $nekoGroupList,'neko_group_json' => $neko_group_json));
+		// CBBXE
+		
 		$this->set($crudBaseData);
 		$this->set(array(
-			'title_for_layout'=>'タイトルカテゴリ',
+			'title_for_layout'=>'ネコ',
 			'data'=> $data,
 		));
 		
@@ -99,74 +112,41 @@ class TitleCtgController extends CrudBaseController {
 	public function front_a(){
 		
 		// フロントA用のコンポーネント
-		$this->TitleCtgFrontA = $this->Components->load('TitleCtgFrontA');
+		$this->NekoFrontA = $this->Components->load('NekoFrontA');
 
 		// CrudBase共通処理（前）
 		$option = array(
 				'func_csv_export'=>0, // CSVエクスポート機能 0:OFF ,1:ON
 				'func_file_upload'=>1, // ファイルアップロード機能 0:OFF , 1:ON
 		);
-		$crudBaseData = $this->indexBefore('TitleCtg',$option);//indexアクションの共通先処理(CrudBaseController)
+		$crudBaseData = $this->indexBefore('Neko',$option);//indexアクションの共通先処理(CrudBaseController)
 		
 		// ディレクトリパステンプレートを調整する(パスはindex用の相対パスになっているのでズレを調整しなければならない）
-		$crudBaseData['dptData'] = $this->TitleCtgFrontA->adjustDpt($crudBaseData['dptData']);
+		$crudBaseData['dp_tmpl'] = $this->NekoFrontA->adjustDpt($crudBaseData['dp_tmpl']);
 		
 		//一覧データを取得
-		$data = $this->TitleCtg->findData($crudBaseData);
+		$data = $this->Neko->findData($crudBaseData);
 		
 		// CrudBase共通処理（後）
 		$crudBaseData = $this->indexAfter($crudBaseData,['method_url'=>'front_a']);//indexアクションの共通後処理
 		
 		// CBBXS-1020-2
-
+		$nekoGroupList = $this->Neko->getNekoGroupList();
+		$neko_group_json = json_encode($nekoGroupList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
+		$this->set(array('nekoGroupList' => $nekoGroupList,'neko_group_json' => $neko_group_json));
 		// CBBXE
 		
 		$this->set($crudBaseData);
 		$this->setCommon();//当画面系の共通セット
 		$this->set(array(
 				'header' => 'front_a_header',
-				'title_for_layout'=>'タイトルカテゴリ',
+				'title_for_layout'=>'ネコ',
 				'data'=> $data,
 		));
 		
 		
 		
 	}
-	
-
-	/**
-	 * 詳細画面
-	 * 
-	 * タイトルカテゴリ情報の詳細を表示します。
-	 * この画面から入力画面に遷移できます。
-	 * 
-	 */
-	public function detail() {
-		
-		$res=$this->edit_before('TitleCtg');
-		$ent=$res['ent'];
-	
-
-		$this->set(array(
-				'title_for_layout'=>'タイトルカテゴリ・詳細',
-				'ent'=>$ent,
-		));
-		
-		//当画面系の共通セット
-		$this->setCommon();
-	
-	}
-
-
-
-
-
-
-
-
-
-
-
 
 
 	
@@ -186,10 +166,10 @@ class TitleCtgController extends CrudBaseController {
 		$errs = array(); // エラーリスト
 		
 
-		// 認証中でなければエラー
-		if(empty($this->Auth->user())){
-			return 'Error:login is needed.';// 認証中でなければエラー
-		}
+// 		// 認証中でなければエラー
+// 		if(empty($this->Auth->user())){
+// 			return 'Error:login is needed.';// 認証中でなければエラー
+// 		}
 		
 		// 未ログインかつローカルでないなら、エラーアラートを返す。
 		if(empty($this->Auth->user()) && $_SERVER['SERVER_NAME']!='localhost'){
@@ -205,14 +185,20 @@ class TitleCtgController extends CrudBaseController {
 		$regParam = json_decode($reg_param_json,true);
 		$form_type = $regParam['form_type']; // フォーム種別 new_inp,edit,delete,eliminate
 
+
+		// アップロードファイル名を変換する。
+		$ent = $this->convUploadFileName($ent,$_FILES);
+
 		// 更新ユーザーなど共通フィールドをセットする。
 		$ent = $this->setCommonToEntity($ent);
 	
 		// エンティティをDB保存
-		$this->TitleCtg->begin();
-		$ent = $this->TitleCtg->saveEntity($ent,$regParam);
-		$this->TitleCtg->commit();//コミット
-
+		$this->Neko->begin();
+		$ent = $this->Neko->saveEntity($ent,$regParam);
+		$this->Neko->commit();//コミット
+		
+		// ファイルアップロード関連の一括作業
+		$res = $this->workFileUploads($form_type,$this->dp_tmpl, $this->viaDpFnMap, $ent, $_FILES);
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
 		
 		if($errs) $ent['err'] = implode("','",$errs); // フォームに表示するエラー文字列をセット
@@ -259,15 +245,14 @@ class TitleCtgController extends CrudBaseController {
 		$ent['delete_flg'] = $ent0['delete_flg'];
 	
 		// エンティティをDB保存
-		$this->TitleCtg->begin();
+		$this->Neko->begin();
 		if($eliminate_flg == 0){
-			$ent = $this->TitleCtg->saveEntity($ent,$regParam); // 更新
+			$ent = $this->Neko->saveEntity($ent,$regParam); // 更新
 		}else{
-			$dtpData = $this->getDptData(); // ディレクトリパステンプレート情報
-			$this->TitleCtg->eliminateFiles($ent['id'],'img_fn',$dtpData); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
-			$this->TitleCtg->delete($ent['id']); // 削除
+			$this->Neko->eliminateFiles($ent['id'], 'img_fn', $ent, $this->dp_tmpl, $this->viaDpFnMap); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
+			$this->Neko->delete($ent['id']); // 削除
 		}
-		$this->TitleCtg->commit();//コミット
+		$this->Neko->commit();//コミット
 	
 		$ent=Sanitize::clean($ent, array('encode' => true));//サニタイズ（XSS対策）
 		$json_data=json_encode($ent);//JSONに変換
@@ -295,9 +280,9 @@ class TitleCtgController extends CrudBaseController {
 		$data = json_decode($json,true);//JSON文字を配列に戻す
 		
 		// データ保存
-		$this->TitleCtg->begin();
-		$this->TitleCtg->saveAll($data); // まとめて保存。内部でSQLサニタイズされる。
-		$this->TitleCtg->commit();
+		$this->Neko->begin();
+		$this->Neko->saveAll($data); // まとめて保存。内部でSQLサニタイズされる。
+		$this->Neko->commit();
 
 		$res = array('success');
 		
@@ -319,7 +304,7 @@ class TitleCtgController extends CrudBaseController {
 		$this->autoRender = false;//ビュー(ctp)を使わない。
 		if(empty($this->Auth->user())) return 'Error:login is needed.';// 認証中でなければエラー
 		
-		$this->csv_fu_base($this->TitleCtg,array('id','title_ctg_val','title_ctg_name','title_ctg_date','title_ctg_group','title_ctg_dt','img_fn','note','sort_no'));
+		$this->csv_fu_base($this->Neko,array('id','neko_val','neko_name','neko_date','neko_group','neko_dt','img_fn','note','sort_no'));
 		
 	}
 	
@@ -362,7 +347,7 @@ class TitleCtgController extends CrudBaseController {
 		//CSVファイル名を作成
 		$date = new DateTime();
 		$strDate=$date->format("Y-m-d");
-		$fn='title_ctg'.$strDate.'.csv';
+		$fn='neko'.$strDate.'.csv';
 	
 	
 		//CSVダウンロード
@@ -383,10 +368,10 @@ class TitleCtgController extends CrudBaseController {
 		 
 		
 		//セッションから検索条件情報を取得
-		$kjs=$this->Session->read('title_ctg_kjs');
+		$kjs=$this->Session->read('neko_kjs');
 		
 		// セッションからページネーション情報を取得
-		$pages = $this->Session->read('title_ctg_pages');
+		$pages = $this->Session->read('neko_pages');
 
 		$page_no = 0;
 		$row_limit = 100000;
@@ -404,7 +389,7 @@ class TitleCtgController extends CrudBaseController {
 		
 
 		//DBからデータ取得
-		$data=$this->TitleCtg->findData($crudBaseData);
+		$data=$this->Neko->findData($crudBaseData);
 		if(empty($data)){
 			return array();
 		}
@@ -442,7 +427,8 @@ class TitleCtgController extends CrudBaseController {
 
 		
 		// CBBXS-3001 
-
+		$xxx=0;
+		
 		// CBBXE
 		
 		
@@ -451,16 +437,23 @@ class TitleCtgController extends CrudBaseController {
 				
 				array('name'=>'kj_main','def'=>null),
 				// CBBXS-1000 
-			array('name'=>'kj_id','def'=>null),
-			array('name'=>'kj_title_ctg_name','def'=>null),
-			array('name'=>'kj_note','def'=>null),
-			array('name'=>'kj_sort_no','def'=>null),
-			array('name'=>'kj_delete_flg','def'=>0),
-			array('name'=>'kj_update_user','def'=>null),
-			array('name'=>'kj_ip_addr','def'=>null),
-			array('name'=>'kj_created','def'=>null),
-			array('name'=>'kj_modified','def'=>null),
-
+				array('name'=>'kj_id','def'=>null),
+				array('name'=>'kj_neko_val1','def'=>null),
+				array('name'=>'kj_neko_val2','def'=>null),
+				array('name'=>'kj_neko_name','def'=>null),
+				array('name'=>'kj_neko_date_ym','def'=>null),
+				array('name'=>'kj_neko_date1','def'=>null),
+				array('name'=>'kj_neko_date2','def'=>null),
+				array('name'=>'kj_neko_group','def'=>null),
+				array('name'=>'kj_neko_dt','def'=>null),
+				array('name'=>'kj_img_fn','def'=>null),
+				array('name'=>'kj_note','def'=>null),
+				array('name'=>'kj_sort_no','def'=>null),
+				array('name'=>'kj_delete_flg','def'=>0),
+				array('name'=>'kj_update_user','def'=>null),
+				array('name'=>'kj_ip_addr','def'=>null),
+				array('name'=>'kj_created','def'=>null),
+				array('name'=>'kj_modified','def'=>null),
 				// CBBXE
 				
 				array('name'=>'row_limit','def'=>50),
@@ -475,48 +468,84 @@ class TitleCtgController extends CrudBaseController {
 		$this->kjs_validate=array(
 				
 				// CBBXS-1001
+				
 				'kj_id' => array(
 						'naturalNumber'=>array(
 								'rule' => array('naturalNumber', true),
-								'message' => 'idは数値を入力してください',
+								'message' => 'IDは数値を入力してください',
 								'allowEmpty' => true
 						),
 				),
-				'kj_title_ctg_name'=> array(
+					
+				'kj_neko_val1' => array(
+						'custom'=>array(
+								'rule' => array( 'custom', '/^[-]?[0-9]+?$/' ),
+								'message' => 'ネコ数値1は整数を入力してください。',
+								'allowEmpty' => true
+						),
+				),
+					
+				'kj_neko_val2' => array(
+						'custom'=>array(
+								'rule' => array( 'custom', '/^[-]?[0-9]+?$/' ),
+								'message' => 'ネコ数値2は整数を入力してください。',
+								'allowEmpty' => true
+						),
+				),
+					
+		
+				'kj_neko_name'=> array(
 						'maxLength'=>array(
 								'rule' => array('maxLength', 255),
-								'message' => 'タイトルカテゴリは255文字以内で入力してください',
+								'message' => 'ネコ名前は255文字以内で入力してください',
 								'allowEmpty' => true
 						),
 				),
+		
+				'kj_neko_date1'=> array(
+						'rule' => array( 'date', 'ymd'),
+						'message' => 'ネコ日【範囲1】は日付形式【yyyy-mm-dd】で入力してください。',
+						'allowEmpty' => true
+				),
+		
+				'kj_neko_date2'=> array(
+						'rule' => array( 'date', 'ymd'),
+						'message' => 'ネコ日【範囲2】は日付形式【yyyy-mm-dd】で入力してください。',
+						'allowEmpty' => true
+				),
+					
 				'kj_note'=> array(
 						'maxLength'=>array(
 								'rule' => array('maxLength', 255),
-								'message' => '備考は0文字以内で入力してください',
+								'message' => '備考は255文字以内で入力してください',
 								'allowEmpty' => true
 						),
 				),
+			
 				'kj_sort_no' => array(
-						'custom'=>array(
-								'rule' => array( 'custom', '/^[-]?[0-9] ?$/' ),
-								'message' => '順番は整数を入力してください。',
-								'allowEmpty' => true
-						),
+					'custom'=>array(
+						'rule' => array( 'custom', '/^[-]?[0-9]+?$/' ),
+						'message' => '順番は整数を入力してください。',
+						'allowEmpty' => true
+					),
 				),
+					
 				'kj_update_user'=> array(
 						'maxLength'=>array(
-								'rule' => array('maxLength', 255),
+								'rule' => array('maxLength', 50),
 								'message' => '更新者は50文字以内で入力してください',
 								'allowEmpty' => true
 						),
 				),
+					
 				'kj_ip_addr'=> array(
 						'maxLength'=>array(
-								'rule' => array('maxLength', 255),
-								'message' => 'IPアドレスは40文字以内で入力してください',
+								'rule' => array('maxLength', 40),
+								'message' => '更新IPアドレスは40文字以内で入力してください',
 								'allowEmpty' => true
 						),
 				),
+					
 				'kj_created'=> array(
 						'maxLength'=>array(
 								'rule' => array('maxLength', 20),
@@ -524,6 +553,7 @@ class TitleCtgController extends CrudBaseController {
 								'allowEmpty' => true
 						),
 				),
+					
 				'kj_modified'=> array(
 						'maxLength'=>array(
 								'rule' => array('maxLength', 20),
@@ -531,7 +561,7 @@ class TitleCtgController extends CrudBaseController {
 								'allowEmpty' => true
 						),
 				),
-
+				
 				// CBBXE
 		);
 		
@@ -545,50 +575,74 @@ class TitleCtgController extends CrudBaseController {
 			// CBBXS-1002
 			'id'=>array(
 					'name'=>'ID',//HTMLテーブルの列名
-					'row_order'=>'TitleCtg.id',//SQLでの並び替えコード
+					'row_order'=>'Neko.id',//SQLでの並び替えコード
 					'clm_show'=>1,//デフォルト列表示 0:非表示 1:表示
 			),
-			'title_ctg_name'=>array(
-					'name'=>'タイトルカテゴリ',
-					'row_order'=>'TitleCtg.title_ctg_name',
+			'neko_val'=>array(
+					'name'=>'ネコ数値',
+					'row_order'=>'Neko.neko_val',
+					'clm_show'=>0,
+			),
+			'neko_name'=>array(
+					'name'=>'ネコ名前',
+					'row_order'=>'Neko.neko_name',
+					'clm_show'=>1,
+			),
+			'neko_group'=>array(
+				'name'=>'ネコ種別',
+				'row_order'=>'Neko.neko_group',
+				'clm_show'=>1,
+			),
+			'neko_date'=>array(
+					'name'=>'ネコ日',
+					'row_order'=>'Neko.neko_date',
+					'clm_show'=>1,
+			),
+			'neko_dt'=>array(
+					'name'=>'ネコ日時',
+					'row_order'=>'Neko.neko_dt',
+					'clm_show'=>1,
+			),
+			'img_fn'=>array(
+					'name'=>'画像ファイル名',
+					'row_order'=>'Neko.img_fn',
 					'clm_show'=>1,
 			),
 			'note'=>array(
 					'name'=>'備考',
-					'row_order'=>'TitleCtg.note',
-					'clm_show'=>1,
-			),
-			'sort_no'=>array(
-					'name'=>'順番',
-					'row_order'=>'TitleCtg.sort_no',
+					'row_order'=>'Neko.note',
 					'clm_show'=>0,
 			),
+			'sort_no'=>array(
+				'name'=>'順番',
+				'row_order'=>'Neko.sort_no',
+				'clm_show'=>0,
+			),
 			'delete_flg'=>array(
-					'name'=>'無効フラグ',
-					'row_order'=>'TitleCtg.delete_flg',
+					'name'=>'削除フラグ',
+					'row_order'=>'Neko.delete_flg',
 					'clm_show'=>1,
 			),
 			'update_user'=>array(
 					'name'=>'更新者',
-					'row_order'=>'TitleCtg.update_user',
+					'row_order'=>'Neko.update_user',
 					'clm_show'=>0,
 			),
 			'ip_addr'=>array(
-					'name'=>'IPアドレス',
-					'row_order'=>'TitleCtg.ip_addr',
-					'clm_show'=>1,
+					'name'=>'更新IPアドレス',
+					'row_order'=>'Neko.ip_addr',
+					'clm_show'=>0,
 			),
 			'created'=>array(
 					'name'=>'生成日時',
-					'row_order'=>'TitleCtg.created',
+					'row_order'=>'Neko.created',
 					'clm_show'=>0,
 			),
 			'modified'=>array(
 					'name'=>'更新日時',
-					'row_order'=>'TitleCtg.modified',
-					'clm_show'=>0,
+					'row_order'=>'Neko.modified',
+					'clm_show'=>1,
 			),
-
 			// CBBXE
 		));
 

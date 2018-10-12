@@ -1,21 +1,9 @@
 
-<h1>目次</h1>
 
 
-<ul>
-	<li><a href="neko?a=1">ネコCRUDサンプル</a></li>
-	<li><a href="<?php echo $this->Html->webroot.'yagi'?>">ヤギAjaxサンプル</a></li>
-	<li><a href="<?php echo $this->Html->webroot.'kani'?>">カニ・ワーカースレッド ver 1.1</a></li>
-	<li><a href="<?php echo $this->Html->webroot.'same'?>">サメファイル読込</a></li>
-	<li><a href="<?php echo $this->Html->webroot.'no_auth'?>">ログイン認証の検証</a></li>
-	<li><a href="<?php echo $this->Html->webroot.'devloper'?>">特別ページ</a></li>
-	<li><a href="<?php echo $this->Html->webroot.'app/webroot/doxygen/html/index.html'?>">ドキュメント | Doxygen</a></li>
-	<li><a href="../shch">テスト（一時的shch）</a></li>
-	
-</ul>
+<a href="neko?a=1">ホームへ</a>
 
-
-<div style="margin-top:100px">
+<div style="margin-top:100px;display:none">
 
 	<div style="height:200px;overflow: auto;">
 		<table class="table">
@@ -62,6 +50,4 @@
 		</table>
 	</div>
 </div>
-<hr>
-<aside>※CrudBaseControllerにバージョンを記載</aside>
 

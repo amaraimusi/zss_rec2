@@ -37,22 +37,7 @@ class AppController extends Controller {
 		$this->set('role',$role);
 	}
 
-	/**
-	 * OPチャット設定情報をセッションから取得する。
-	 * 
-	 * @note
-	 * セッション中に存在しなければデフォルトを取得。
-	 * @return チャット設定情報
-	 */
-    protected function getOpChatConfig(){
-    	$chatConfig=$this->Session->read('shch_chat_config');
-    	if(empty($chatConfig)){
-    		$chatConfig=Configure::read('chatConfig');
-    	}
-    	
-    	
-    	return $chatConfig;
-    }
+
     
  
     

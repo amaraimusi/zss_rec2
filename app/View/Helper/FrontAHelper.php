@@ -4,8 +4,8 @@ App::uses('FormHelper', 'View/Helper');
 /**
  * フロントAページ用ヘルパー
  * 
- * @version 1.0.0
- * @date 2018-10-4
+ * @version 1.0.1
+ * @date 2018-10-8
  * @author k-uehara
  *
  */
@@ -13,11 +13,9 @@ App::uses('FormHelper', 'View/Helper');
 class FrontAHelper extends Helper {
 
 	private $data; 
-	
-	private $dptData; // ディレクトリパステンプレート・データ
-	
-	private $dps = array(); // ディレクトリパスデータ
-	
+	private $dp_tmpl; // ディレクトリパステンプレート・データ
+	private $viaDpFnMap; // 経由パスマッピング
+
 	
 	/**
 	 * トップ・ページリンクボタンを作成する
@@ -65,65 +63,30 @@ class FrontAHelper extends Helper {
 	 * 初期化
 	 * @param array $option
 	 *  - data 
-	 *  - dtpData ディレクトリパステンプレート・データ
+	 *  - dp_tmpl ディレクトリパステンプレート
 	 *  
 	 */
 	public function init($option){
 		
 		$data = $option['data'];
-		$dptData = $option['dptData'];
-		
-		// ディレクトリパステンプレート・データのキーをフォルダ名に変換する
-		$dptData = $this->convKeyOfDptData($dptData);
-		
-		// ディレクトリパスデータの作成
-		$this->dps = $this->makeDps($data,$dptData);
+		$dp_tmpl = $option['dp_tmpl'];
+		$viaDpFnMap = $option['viaDpFnMap'];
 
 		$this->data = $data;
-		$this->dptData = $dptData;
+		$this->dp_tmpl = $dp_tmpl;
+		$this->viaDpFnMap = $viaDpFnMap;
 
 	}
 	
-	/**
-	 * ディレクトリパステンプレート・データのキーをフォルダ名に変換する
-	 * @param array $dptData ディレクトリパステンプレート・データ
-	 * @return array キー変換後のディレクトリパステンプレート・データ
-	 */
-	private function convKeyOfDptData($dptData){
-		
-		$dptData2 = array();
-		foreach($dptData as $dpt){
-			// ディレクトリパステンプレートからキーを取得する
-			$key2 = $this->getKeyFromDpt($dpt);
-			$dptData2[$key2] = $dpt;
-		}
-		
-		return $dptData2;
-	}
-	
-	
-	/**
-	 * ディレクトリパステンプレートからキーを取得する
-	 * @param string $dpt ディレクトリパステンプレート
-	 * @return string キー
-	 */
-	private function getKeyFromDpt($dpt){
-		$strs = explode("/",$dpt);
-		$strs = array_reverse($strs);
-		foreach($strs as $str){
-			if(!empty($str)) return $str;
-		}
-		return '';
-	}
 	
 	
 	/**
 	 * ディレクトリパスデータの作成
 	 * @param array $data
-	 * @param array $dptData ディレクトリパステンプレート・データ
+	 * @param array $dp_tmpl ディレクトリパステンプレート・データ
 	 * @return array ディレクトリパスデータ
 	 */
-	private function makeDps(&$data,&$dptData){
+	private function makeDps(&$data,&$dp_tmpl){
 		
 		$dps = array(); // ディレクトリパスデータ
 		if(empty($data)) return $dps;
@@ -132,7 +95,7 @@ class FrontAHelper extends Helper {
 		$ent = $data[0];
 		foreach($ent as $field => $value){
 			$dps[$field] = array();
-			foreach($dptData as $key => $dpt){
+			foreach($dp_tmpl as $key => $dpt){
 				$dp = str_replace('%field' , $field , $dpt );
 				$dps[$field][$key] = $dp;
 			}
@@ -195,19 +158,49 @@ class FrontAHelper extends Helper {
 			return;
 		}
 		
-		$mid_dp = $this->dps[$field]['mid'];
-		$mid_fp = $mid_dp . $fn;
-		$orig_dp = $this->dps[$field]['orig'];
-		$orig_fp = $orig_dp . $fn;
-		
+		// ファイルパスを組み立てる
+		$orig_fp = $this->buildFp('orig', $ent, $field);
+		$mid_fp = $this->buildFp('mid', $ent, $field);
+
 		echo "
 			<td class='{$class_v}'>
-			<img class='{$field} img-responsive' src='{$mid_fp}' alt='{$fn}' /><br>
-			<a href='{$orig_fp}' class='btn btn-link btn-xs' target='brank'>[拡大]</a>
+			<img class='{$field} img-responsive' src='{$mid_fp}' alt='{$fn}' />
+			<a href='{$orig_fp}' class='btn btn-link btn-xs' target='blank'>[拡大]</a>
 			</td>
 		";
 		
 	}
+	
+	
+	/**
+	 * ファイルパスを組み立てる
+	 * @param string $dn ディレクトリ名
+	 * @param array $ent データのエンティティ
+	 * @param string $field フィールド
+	 * @return string ファイルパス
+	 */
+	private function buildFp($dn, &$ent, $field){
+		
+		// ▼ ディレクトリパス・テンプレートのフィールド名、フォルダ名部分を置換する。
+		$fp = $this->dp_tmpl;
+		$fp = str_replace('%field', $field, $fp);
+		$fp = str_replace('%dn', $dn, $fp);
+		
+		// ▼ 経由パス部分を置換する
+		$via_dp = '';
+		if(!empty($this->viaDpFnMap[$field])){
+			$via_dp_field = $this->viaDpFnMap[$field];
+			$via_dp = $ent[$via_dp_field];
+		}
+		
+		$fp = str_replace('%via_dp', $via_dp, $fp);
+		$fp = str_replace('//', '/', $fp);
+		
+		$fp .= $ent[$field]; // ファイル名を連結
+		
+		return $fp;
+	}
+	
 	
 	/**
 	 * 長文TD要素出力
