@@ -9,8 +9,8 @@ App::uses('CbFileUploadHComp', 'View/Helper/Component');
  * 検索条件入力フォームや、一覧テーブルのプロパティのラッパーを提供する
  * 
  * 
- * @version 1.6.5
- * @date 2016-7-27 | 2018-10-10
+ * @version 1.6.6
+ * @date 2016-7-27 | 2018-10-12
  * @author k-uehara
  *
  */
@@ -85,9 +85,8 @@ class CrudBaseHelper extends FormHelper {
 				'jquery-ui.min',
 				'Layouts/default',
 				'CrudBase/common',
-				//'jquery.datetimepicker.min',		// 日時ピッカー(重いので保留■■■□□□■■■□□□■■■□□□）
+				//'jquery.datetimepicker.min',		// 日時ピッカー(重いので保留
 				'clm_show_hide',					// 列表示切替
-				'CrudBase/DatepickerWrap',						// 年月ピッカーのラッパー
 				'nouislider.min',					// 数値範囲入力スライダー・noUiSlider
 				'CrudBase/NoUiSliderWrap',			// noUiSliderのラップ
 				'CrudBase/FileUploadK.css?ver=1.0.1',	
@@ -881,13 +880,15 @@ class CrudBaseHelper extends FormHelper {
 		$v = $ent[$field];
 		
 		$v2="";
+		$long_over_flg = 0; // 制限文字数オーバーフラグ
 		if(!empty($v)){
 			$v = h($v);
 			if($str_len === null){
 				$v2 = $v;
 			}else{
 				if(mb_strlen($v) > $str_len){
-					$v2=mb_strimwidth($v, 0, $str_len, "...");
+					$v2=mb_strimwidth($v, 0, $str_len * 2);
+					$long_over_flg = 1;
 				}else{
 					$v2 = $v;
 				}
@@ -896,7 +897,17 @@ class CrudBaseHelper extends FormHelper {
 			$v2= str_replace('\\', '', $v2);
 		}
 
-		$td = "<td><input type='hidden' name='{$field}' value='{$v}' /><span class='{$field}'>{$v2}</span></td>\n";
+		// ノート詳細開きボタンのHTMLを作成
+		$note_detail_open_html = '';
+		if($long_over_flg) {
+			$note_detail_open_html = "<input type='button' class='btn btn-default btn-xs' value='...' onclick='openNoteDetail(this)' />";
+		}
+		
+		$td = "
+			<td>
+				<input type='hidden' name='{$field}' value='{$v}' />
+				<span class='{$field}'>{$v2}</span>{$note_detail_open_html}
+			</td>";
 		$this->setTd($td,$field);
 	}
 	

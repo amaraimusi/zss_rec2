@@ -12,9 +12,10 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2018-10-11
- * @version 2.5.5
+ * @date 2016-9-21 | 2018-10-12
+ * @version 2.5.6
  * @histroy
+ * 2018-10-9 v2.5.6 ノート詳細開き機能
  * 2018-10-9 v2.5.1 経由ディレクトリパスに対応
  * 2018-10-2 v2.5.0 フォームドラッグとリサイズ
  * 2018-9-19 v2.4.5 ファイルアップロード機能：DnDに対応
@@ -3812,7 +3813,64 @@ class CrudBase{
 		}
 	}
 	
-	
+	/**
+	 * ノート詳細を開く
+	 * @param btnElm 詳細ボタン要素
+	 */
+	openNoteDetail(btnElm,field){
+		
+		if(field == null) field = 'note';
+		
+		// 親要素であるTD要素を取得する
+		var td = btnElm.parents('td');
+		
+		// フィールド要素を取得する
+		var fieldElm = td.find("[name='" + field + "']");
+		
+		// 短文要素を取得する
+		var shortElm = td.find('.' + field);
+		
+		// ノート詳細要素を作成および取得する
+		var maked = 1; // 作成済みフラグ  0:未作成 , 1:作成済み
+		var noteDetailElm = td.find('.note_detail');
+		if(!noteDetailElm[0]){
+			maked = 0;
+			var note_detail_html = "<div class='note_detail'></div>";
+			td.append(note_detail_html);
+			noteDetailElm = td.find('.note_detail');
+		}
+		
+		// 短文要素が隠れている場合（ノート詳細が開かれている状態である場合）
+		if(shortElm.css('display') == 'none'){
+			shortElm.show();
+			noteDetailElm.hide();
+			btnElm.val('...');
+			return;
+		}
+		
+		// ノート詳細が作成済みである場合
+		if(maked){
+			shortElm.hide();
+			noteDetailElm.show();
+			btnElm.val('閉じる');
+			return;
+		}
+
+		// ノートのフルテキストを取得する
+		var text1 = td.find("[name='" + field + "']").val();
+		if(text1 == null || text1 == '') return;
+		
+		// 改行コードをBRタグに変換する
+		text1 = text1.replace(/\r\n|\n\r|\r|\n/g,'<br>');
+		
+		// ノート詳細にテキストをセットする
+		noteDetailElm.html(text1);
+		
+		// 短文要素を隠し、詳細ボタン名も変更する
+		shortElm.hide();
+		btnElm.val('閉じる');
+		
+	}
 	
 
 }

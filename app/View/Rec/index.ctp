@@ -57,7 +57,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 		$this->CrudBase->inputKjText($kjs,'kj_no_b','番号B');
 		$this->CrudBase->inputKjText($kjs,'kj_rec_title','rec_title');
 		$this->CrudBase->inputKjText($kjs,'kj_parent_id','親ID');
-$this->CrudBase->inputKjFlg($kjs,'kj_public_flg','公開');
+		$this->CrudBase->inputKjFlg($kjs,'kj_public_flg','公開');
 		$this->CrudBase->inputKjHidden($kjs,'kj_sort_no');
 		$this->CrudBase->inputKjDeleteFlg($kjs);
 		$this->CrudBase->inputKjText($kjs,'kj_update_user','更新者');
@@ -155,7 +155,7 @@ foreach($data as $i=>$ent){
 	$this->CrudBase->tdId($ent,'id',array('checkbox_name'=>'pwms'));
 	$this->CrudBase->tdList($ent,'title_id',$titleIdList);
 	$this->CrudBase->tdPlain($ent,'rec_date');
-	$this->CrudBase->tdNote($ent,'note');
+	$this->CrudBase->tdNote($ent,'note',50);
 	$this->CrudBase->tdList($ent,'rec_ctg_id',$recCtgIdList);
 	$this->CrudBase->tdImage($ent,'img_fn');
 	$this->CrudBase->tdStr($ent,'img_dp');
