@@ -3860,6 +3860,9 @@ class CrudBase{
 		var text1 = td.find("[name='" + field + "']").val();
 		if(text1 == null || text1 == '') return;
 		
+		// XSSサニタイズ
+		text1 = this._xssSanitaizeEncode(text1);
+		
 		// 改行コードをBRタグに変換する
 		text1 = text1.replace(/\r\n|\n\r|\r|\n/g,'<br>');
 		
