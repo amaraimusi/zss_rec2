@@ -8,8 +8,8 @@ App::uses('PagenationForCake', 'Vendor/Wacg');
  * @note
  * タイトル画面ではタイトル一覧を検索閲覧、編集など多くのことができます。
  * 
- * @date 2015-9-16 | 2018-10-4 フロントAページ追加
- * @version 3.2.0
+ * @date 2015-9-16 | 2018-10-10
+ * @version 3.2.2
  *
  */
 class TitleController extends CrudBaseController {
@@ -45,8 +45,8 @@ class TitleController extends CrudBaseController {
 	public $edit_validate = array();
 	
 	// 当画面バージョン (バージョンを変更すると画面に新バージョン通知とクリアボタンが表示されます。）
-	public $this_page_version = '1.9.1'; 
-
+	public $this_page_version = '1.9.1';
+	
 
 
 	public function beforeFilter() {
@@ -87,6 +87,8 @@ class TitleController extends CrudBaseController {
 		$title_ctg_id_json = json_encode($titleCtgIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
 		$this->set(array('titleCtgIdList' => $titleCtgIdList,'title_ctg_id_json' => $title_ctg_id_json));
 
+		// CBBXE
+		
 		$this->set($crudBaseData);
 		$this->set(array(
 			'title_for_layout'=>'タイトル',
@@ -115,9 +117,7 @@ class TitleController extends CrudBaseController {
 		);
 		$crudBaseData = $this->indexBefore('Title',$option);//indexアクションの共通先処理(CrudBaseController)
 		
-		// ディレクトリパステンプレートを調整する(パスはindex用の相対パスになっているのでズレを調整しなければならない）
-		$crudBaseData['dptData'] = $this->TitleFrontA->adjustDpt($crudBaseData['dptData']);
-		
+
 		//一覧データを取得
 		$data = $this->Title->findData($crudBaseData);
 		
@@ -144,41 +144,6 @@ class TitleController extends CrudBaseController {
 		
 		
 	}
-	
-
-	/**
-	 * 詳細画面
-	 * 
-	 * タイトル情報の詳細を表示します。
-	 * この画面から入力画面に遷移できます。
-	 * 
-	 */
-	public function detail() {
-		
-		$res=$this->edit_before('Title');
-		$ent=$res['ent'];
-	
-
-		$this->set(array(
-				'title_for_layout'=>'タイトル・詳細',
-				'ent'=>$ent,
-		));
-		
-		//当画面系の共通セット
-		$this->setCommon();
-	
-	}
-
-
-
-
-
-
-
-
-
-
-
 
 
 	
@@ -197,7 +162,6 @@ class TitleController extends CrudBaseController {
 		$this->autoRender = false;//ビュー(ctp)を使わない。
 		$errs = array(); // エラーリスト
 		
-
 		// 認証中でなければエラー
 		if(empty($this->Auth->user())){
 			return 'Error:login is needed.';// 認証中でなければエラー
@@ -224,8 +188,9 @@ class TitleController extends CrudBaseController {
 		$this->Title->begin();
 		$ent = $this->Title->saveEntity($ent,$regParam);
 		$this->Title->commit();//コミット
-
+		
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
+		
 		
 		if($errs) $ent['err'] = implode("','",$errs); // フォームに表示するエラー文字列をセット
 
@@ -275,8 +240,6 @@ class TitleController extends CrudBaseController {
 		if($eliminate_flg == 0){
 			$ent = $this->Title->saveEntity($ent,$regParam); // 更新
 		}else{
-			$dtpData = $this->getDptData(); // ディレクトリパステンプレート情報
-			$this->Title->eliminateFiles($ent['id'],'img_fn',$dtpData); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
 			$this->Title->delete($ent['id']); // 削除
 		}
 		$this->Title->commit();//コミット
@@ -321,19 +284,7 @@ class TitleController extends CrudBaseController {
 
 	
 	
-	/**
-	 * CSVインポート | AJAX
-	 *
-	 * @note
-	 *
-	 */
-	public function csv_fu(){
-		$this->autoRender = false;//ビュー(ctp)を使わない。
-		if(empty($this->Auth->user())) return 'Error:login is needed.';// 認証中でなければエラー
-		
-		$this->csv_fu_base($this->Title,array('id','title_val','title_name','title_date','title_group','title_dt','img_fn','note','sort_no'));
-		
-	}
+
 	
 
 
@@ -505,7 +456,7 @@ class TitleController extends CrudBaseController {
 				),
 				'kj_title_ctg_id' => array(
 						'custom'=>array(
-								'rule' => array( 'custom', '/^[-]?[0-9] ?$/' ),
+								'rule' => array( 'custom', '/^[-]?[0-9]+$/' ),
 								'message' => 'タイトルカテゴリは整数を入力してください。',
 								'allowEmpty' => true
 						),
@@ -519,7 +470,7 @@ class TitleController extends CrudBaseController {
 				),
 				'kj_sort_no' => array(
 						'custom'=>array(
-								'rule' => array( 'custom', '/^[-]?[0-9] ?$/' ),
+								'rule' => array( 'custom', '/^[-]?[0-9]+$/' ),
 								'message' => '順番は整数を入力してください。',
 								'allowEmpty' => true
 						),

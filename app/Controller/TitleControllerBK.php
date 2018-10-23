@@ -115,9 +115,7 @@ class TitleController extends CrudBaseController {
 		);
 		$crudBaseData = $this->indexBefore('Title',$option);//indexアクションの共通先処理(CrudBaseController)
 		
-		// ディレクトリパステンプレートを調整する(パスはindex用の相対パスになっているのでズレを調整しなければならない）
-		$crudBaseData['dptData'] = $this->TitleFrontA->adjustDpt($crudBaseData['dptData']);
-		
+
 		//一覧データを取得
 		$data = $this->Title->findData($crudBaseData);
 		
@@ -144,44 +142,9 @@ class TitleController extends CrudBaseController {
 		
 		
 	}
-	
-
-	/**
-	 * 詳細画面
-	 * 
-	 * タイトル情報の詳細を表示します。
-	 * この画面から入力画面に遷移できます。
-	 * 
-	 */
-	public function detail() {
-		
-		$res=$this->edit_before('Title');
-		$ent=$res['ent'];
-	
-
-		$this->set(array(
-				'title_for_layout'=>'タイトル・詳細',
-				'ent'=>$ent,
-		));
-		
-		//当画面系の共通セット
-		$this->setCommon();
-	
-	}
 
 
 
-
-
-
-
-
-
-
-
-
-
-	
 	
 	
 	
@@ -320,21 +283,7 @@ class TitleController extends CrudBaseController {
 	
 
 	
-	
-	/**
-	 * CSVインポート | AJAX
-	 *
-	 * @note
-	 *
-	 */
-	public function csv_fu(){
-		$this->autoRender = false;//ビュー(ctp)を使わない。
-		if(empty($this->Auth->user())) return 'Error:login is needed.';// 認証中でなければエラー
-		
-		$this->csv_fu_base($this->Title,array('id','title_val','title_name','title_date','title_group','title_dt','img_fn','note','sort_no'));
-		
-	}
-	
+
 
 
 

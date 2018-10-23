@@ -31,17 +31,12 @@ class TitleFrontAComponent extends Component{
 	 * index用に合わせているためindex意外だとズレが生じる。
 	 * そのため当メソッドでパスの調整をする。
 	 * 
-	 * @param array $dptData ディレクトリパステンプレート・データ
-	 * @return array 調整後のディレクトリパステンプレート・データ
+	 * @param array $dp_tmpl ディレクトリパス・テンプレート
+	 * @return array 調整後のディレクトリパス・テンプレート
 	 */
-	public function adjustDpt(&$dptData){
-		
-		foreach($dptData as &$dpt){
-			$dpt = '../' . $dpt;
-		}
-		unset($dpt);
-		
-		return $dptData;
+	public function adjustDpt(&$dp_tmpl){
+
+		return '../' . $dp_tmpl;
 	}
 	
 	

@@ -5,8 +5,8 @@ App::uses('CrudBase', 'Model');
 /**
  * タイトルのCakePHPモデルクラス
  *
- * @date 2015-9-16 | 2018-10-3
- * @version 3.1.0
+ * @date 2015-9-16 | 2018-10-10
+ * @version 3.1.2
  *
  */
 class Title extends AppModel {
@@ -269,20 +269,7 @@ class Title extends AppModel {
 		return $cnt;
 	}
 	
-	/**
-	 * アップロードファイルの抹消処理
-	 * 
-	 * @note
-	 * 他のレコードが保持しているファイルは抹消対象外
-	 * 
-	 * @param int $id
-	 * @param string $fn_field_strs ファイルフィールド群文字列（複数ある場合はコンマで連結）
-	 * @param array $dtpData ディレクトリパステンプレート情報
-	 */
-	public function eliminateFiles($id,$fn_field_strs,&$dtpData){
-		$this->CrudBase->eliminateFiles($this,$id,$fn_field_strs,$dtpData);
-	}
-	
+
 	
 	// CBBXS-1021
 	/**
