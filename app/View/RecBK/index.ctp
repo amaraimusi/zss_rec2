@@ -97,6 +97,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 		
 	<a href="rec/front_a?<?php echo $pages['query_str']; ?>" class="btn btn-info btn-xs" target="brank" >フロント画面</a>
 	<a href="title" class="btn btn-info btn-xs" >タイトル画面</a>
+	
 </div><!-- cb_func_line -->
 
 <div style="clear:both"></div>
@@ -119,8 +120,6 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 
 </div><!-- detail_div -->
 
-<div id="new_inp_form_point"></div><!-- 新規入力フォーム表示地点 -->
-
 
 <div style="margin-top:8px;">
 	<div style="display:inline-block">
@@ -128,7 +127,6 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	</div>
 	<div style="display:inline-block">件数:<?php echo $data_count ?></div>
 </div>
-
 <div id="crud_base_auto_save_msg" style="height:20px;" class="text-success"></div>
 <!-- 一覧テーブル -->
 <table id="rec_tbl" border="1"  class="table table-striped table-bordered table-condensed">
@@ -157,7 +155,7 @@ foreach($data as $i=>$ent){
 	$this->CrudBase->tdId($ent,'id',array('checkbox_name'=>'pwms'));
 	$this->CrudBase->tdList($ent,'title_id',$titleIdList);
 	$this->CrudBase->tdPlain($ent,'rec_date');
-	$this->CrudBase->tdNote($ent,'note');
+	$this->CrudBase->tdNote($ent,'note',50);
 	$this->CrudBase->tdList($ent,'rec_ctg_id',$recCtgIdList);
 	$this->CrudBase->tdImage($ent,'img_fn');
 	$this->CrudBase->tdStr($ent,'img_dp');
@@ -202,296 +200,207 @@ foreach($data as $i=>$ent){
 
 <?php echo $this->element('CrudBase/crud_base_pwms'); // 複数選択による一括処理 ?>
 
+<!-- 新規入力フォーム -->
+<div id="ajax_crud_new_inp_form" class="panel panel-primary">
 
-
-
-
-<table>
-
-	<!-- 新規入力フォーム -->
-	<tr id="ajax_crud_new_inp_form" class="crud_base_form" style="display:none;padding-bottom:60px"><td>
-	
-		<div>
-			<div style="color:#3174af;float:left">新規入力</div>
-			<div style="float:left;margin-left:10px">
-				<button type="button"  onclick="newInpReg();" class="btn btn-success btn-xs reg_btn">
-					<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
-				</button>
-			</div>
-			<div style="float:right">
-				<button type="button" class="btn btn-primary btn-xs" onclick="closeForm('new_inp')"><span class="glyphicon glyphicon-remove"></span></button>
-			</div>
+	<div class="panel-heading">
+		<div class="pnl_head1">新規入力</div>
+		<div class="pnl_head2"></div>
+		<div class="pnl_head3">
+			<button type="button" class="btn btn-primary btn-sm" onclick="closeForm('new_inp')"><span class="glyphicon glyphicon-remove"></span></button>
 		</div>
-		<div style="clear:both;height:4px"></div>
-		<div class="err text-danger"></div>
-		
-		<div style="display:none">
-	    	<input type="hidden" name="form_type">
-	    	<input type="hidden" name="row_index">
-	    	<input type="hidden" name="sort_no">
-		</div>
+	</div>
+	<div class="panel-body">
+	<div class="err text-danger"></div>
 	
-	
+	<div style="display:none">
+    	<input type="hidden" name="form_type">
+    	<input type="hidden" name="row_index">
+    	<input type="hidden" name="sort_no">
+	</div>
+	<table><tbody>
+
 		<!-- CBBXS-1006 -->
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >タイトル: </div>
-			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('title_id',null,$titleIdList,null);?>
-				<label class="text-danger" for="title_id"></label>
-			</div>
-		</div>
+		<tr><td>タイトル: </td><td>
+			<?php $this->CrudBase->selectX('title_id',null,$titleIdList,null);?>
+			<label class="text-danger" for="title_id"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >記録日付: </div>
-			<div class='cbf_input'>
-				<input type="text" name="rec_date" class="valid datepicker" value=""  pattern="([0-9]{4})(/|-)([0-9]{1,2})(/|-)([0-9]{1,2})" title="日付形式（Y-m-d）で入力してください(例：2012-12-12)" />
-				<label class="text-danger" for="rec_date"></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap_long">
-			<div class='cbf_inp_label' >ノート： </div>
-			<div class='cbf_input'>
-				<textarea name="note" maxlength="1000" title="1000文字以内で入力してください" style="height:100px;width:100%"></textarea>
-				<label class="text-danger" for="note"></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >記録カテゴリ: </div>
-			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
-				<label class="text-danger" for="rec_ctg_id"></label>
-			</div>
-		</div>
+		<tr><td>記録日付: </td><td>
+			<input type="text" name="rec_date" class="valid datepicker" value=""  pattern="([0-9]{4})(/|-)([0-9]{1,2})(/|-)([0-9]{1,2})" title="日付形式（Y-m-d）で入力してください(例：2012-12-12)" />
+			<label class="text-danger" for="rec_date"></label>
+		</td></tr>
+		<tr><td>ノート： </td><td>
+			<textarea name="note" style="width:100%;height:100px;"></textarea>
+			<label class="text-danger" for="note"></label>
+		</td></tr>
+		<tr><td>記録カテゴリ: </td><td>
+			<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
+			<label class="text-danger" for="rec_ctg_id"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label_long' >画像: </div>
-			<div class='cbf_input'>
-				<label for="img_fn_n" class="fuk_label" style="width:100px;height:100px;">
-					<input type="file" id="img_fn_n" class="img_fn" style="display:none" accept="image/*" title="画像ファイルのアップロード" />
-				</label>
-			</div>
-		</div>
+		<tr><td>画像: </td><td>
+			<label for="img_fn_n" class="fuk_label" style="width:80px;height:80px;">
+				<input type="file" id="img_fn_n" class="img_fn" style="display:none" accept="image/*" title="画像ファイルをドラッグ＆ドロップ" />
+			</label>
+		</td></tr>
+		<tr>
+			<td><button class="btn btn-default btn-xs" onclick="jQuery('.form_detail_n').toggle(300);">詳細</button></td>
+		</tr>
+		<tr class="form_detail_n"><td>画像ディレクトリパス: </td><td>
+			<input type="text" name="img_dp" class="valid" value=""  maxlength="128" title="128文字以内で入力してください" />
+			<label class="text-danger" for="img_dp"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >画像ディレクトリパス: </div>
-			<div class='cbf_input'>
-				<input type="text" name="img_dp" class="valid " value=""  maxlength="128" title="128文字以内で入力してください" />
-				<label class="text-danger" for="img_dp"></label>
-			</div>
-		</div>
+		<tr class="form_detail_n"><td>参照URL: </td><td>
+			<input type="text" name="ref_url" class="valid" value=""  maxlength="2083" title="2083文字以内で入力してください" />
+			<label class="text-danger" for="ref_url"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >参照URL: </div>
-			<div class='cbf_input'>
-				<input type="text" name="ref_url" class="valid " value=""  maxlength="2083" title="2083文字以内で入力してください" />
-				<label class="text-danger" for="ref_url"></label>
-			</div>
-		</div>
+		<tr class="form_detail_n"><td>番号A: </td><td>
+			<input type="text" name="no_a" class="valid" value=""  pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+			<label class="text-danger" for="no_a"></label>
+		</td></tr>
+		<tr class="form_detail_n"><td>番号B: </td><td>
+			<input type="text" name="no_b" class="valid" value=""  pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+			<label class="text-danger" for="no_b"></label>
+		</td></tr>
+		<tr class="form_detail_n"><td>rec_title: </td><td>
+			<input type="text" name="rec_title" class="valid" value=""  maxlength="50" title="50文字以内で入力してください" />
+			<label class="text-danger" for="rec_title"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号A: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
-				<label class="text-danger" for="no_a" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号B: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
-				<label class="text-danger" for="no_b" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >rec_title: </div>
-			<div class='cbf_input'>
-				<input type="text" name="rec_title" class="valid " value=""  maxlength="50" title="50文字以内で入力してください" />
-				<label class="text-danger" for="rec_title"></label>
-			</div>
-		</div>
+		<tr class="form_detail_n"><td>親ID: </td><td>
+			<input type="text" name="parent_id" class="valid" value=""  pattern="^[0-9]$" maxlength="11" title="数値（自然数）を入力してください" />
+			<label class="text-danger" for="parent_id"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >親ID: </div>
-			<div class='cbf_input'>
-				<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
-				<label class="text-danger" for="parent_id" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >公開: </div>
-			<div class='cbf_input'>
-				<input type="checkbox" name="public_flg" class="valid"/>
-				<label class="text-danger" for="public_flg" ></label>
-			</div>
-		</div>
+		<tr class="form_detail_n"><td>公開: </td><td>
+			<input type="checkbox" name="public_flg" class="valid"/>
+			<label class="text-danger" for="public_flg" ></label>
+		</td></tr>
 
 		<!-- CBBXE -->
-		
-		<div style="clear:both"></div>
-		<div class="cbf_inp_wrap">
-			<button type="button" onclick="newInpReg();" class="btn btn-success reg_btn">
-				<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
-			</button>
-		</div>
-	</td></tr><!-- new_inp_form -->
-
-
-
-	<!-- 編集フォーム -->
-	<tr id="ajax_crud_edit_form" class="crud_base_form"><td colspan='5'>
-		<div  style='width:100%'>
+	</tbody></table>
 	
-			<div>
-				<div style="color:#3174af;float:left">編集</div>
-				<div style="float:left;margin-left:10px">
-					<button type="button"  onclick="editReg();" class="btn btn-success btn-xs reg_btn">
-						<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
-					</button>
-				</div>
-				<div style="float:right">
-					<button type="button" class="btn btn-primary btn-xs" onclick="closeForm('edit')"><span class="glyphicon glyphicon-remove"></span></button>
-				</div>
-			</div>
-			<div style="clear:both;height:4px"></div>
-			<div class="err text-danger"></div>
-			
-			<!-- CBBXS-1007 -->
-			<div class="cbf_inp_wrap">
-				<div class='cbf_inp' >ID: </div>
-				<div class='cbf_input'>
-					<span class="id"></span>
-				</div>
-			</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >タイトル: </div>
-			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('title_id',null,$titleIdList,null);?>
-				<label class="text-danger" for="title_id"></label>
-			</div>
+
+	<button type="button" onclick="newInpReg();" class="btn btn-success reg_btn" style="margin-top:4px">
+		<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
+	</button>
+
+	</div><!-- panel-body -->
+</div>
+
+
+
+<!-- 編集フォーム -->
+<div id="ajax_crud_edit_form" class="panel panel-primary" >
+
+	
+	<div class="panel-heading">
+		<div class="pnl_head1">編集</div>
+		<div class="pnl_head2"></div>
+		<div class="pnl_head3">
+			<button type="button" class="btn btn-primary btn-sm" onclick="closeForm('edit')"><span class="glyphicon glyphicon-remove"></span></button>
 		</div>
+	</div>
+	<div style="display:none">
+    	<input type="hidden" name="sort_no">
+	</div>
+	<div class="panel-body">
+	<div class="err text-danger"></div>
+	<button type="button"  onclick="editReg();" class="btn btn-success reg_btn">
+		<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
+	</button>
+	<table><tbody>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >記録日付: </div>
-			<div class='cbf_input'>
-				<input type="text" name="rec_date" class="valid datepicker" value=""  pattern="([0-9]{4})(/|-)([0-9]{1,2})(/|-)([0-9]{1,2})" title="日付形式（Y-m-d）で入力してください(例：2012-12-12)" />
-				<label class="text-danger" for="rec_date"></label>
-			</div>
-		</div>
+		<!-- CBBXS-1007 -->
+		<tr><td>ID: </td><td>
+			<span class="id"></span>
+		</td></tr>
+		<tr><td>タイトル: </td><td>
+			<?php $this->CrudBase->selectX('title_id',null,$titleIdList,null);?>
+			<label class="text-danger" for="title_id"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap_long">
-			<div class='cbf_inp_label' >ノート： </div>
-			<div class='cbf_input'>
-				<textarea name="note" maxlength="1000" title="1000文字以内で入力してください" style="height:100px;width:100%"></textarea>
-				<label class="text-danger" for="note"></label>
-			</div>
-		</div>
+		<tr><td>記録日付: </td><td>
+			<input type="text" name="rec_date" class="valid datepicker" value=""  pattern="([0-9]{4})(/|-)([0-9]{1,2})(/|-)([0-9]{1,2})" title="日付形式（Y-m-d）で入力してください(例：2012-12-12)" />
+			<label class="text-danger" for="rec_date"></label>
+		</td></tr>
+		<tr><td>ノート： </td><td>
+			<textarea name="note" style="width:100%;height:100px;"></textarea>
+			<label class="text-danger" for="note"></label>
+		</td></tr>
+		<tr><td>記録カテゴリ: </td><td>
+			<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
+			<label class="text-danger" for="rec_ctg_id"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >記録カテゴリ: </div>
-			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
-				<label class="text-danger" for="rec_ctg_id"></label>
-			</div>
-		</div>
+		<tr><td>画像: </td><td>
+			<label for="img_fn_e" class="fuk_label" style="width:80px;height:80px;">
+				<input type="file" id="img_fn_e" class="img_fn" style="display:none" accept="image/*" title="画像ファイルをドラッグ＆ドロップ" />
+			</label>
+		</td></tr>
+		<tr>
+			<td><button class="btn btn-default btn-xs" onclick="jQuery('.form_detail_e').toggle(300);">詳細</button></td>
+		</tr>
+		<tr class="form_detail_e"><td>画像ディレクトリパス: </td><td>
+			<input type="text" name="img_dp" class="valid" value=""  maxlength="128" title="128文字以内で入力してください" />
+			<label class="text-danger" for="img_dp"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label_long' >画像: </div>
-			<div class='cbf_input'>
-				<label for="img_fn_e" class="fuk_label" style="width:100px;height:100px;">
-					<input type="file" id="img_fn_e" class="img_fn" style="display:none" accept="image/*" title="画像ファイルのアップロード" />
-				</label>
-			</div>
-		</div>
+		<tr class="form_detail_e"><td>参照URL: </td><td>
+			<input type="text" name="ref_url" class="valid" value=""  maxlength="2083" title="2083文字以内で入力してください" />
+			<label class="text-danger" for="ref_url"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >画像ディレクトリパス: </div>
-			<div class='cbf_input'>
-				<input type="text" name="img_dp" class="valid " value=""  maxlength="128" title="128文字以内で入力してください" />
-				<label class="text-danger" for="img_dp"></label>
-			</div>
-		</div>
+		<tr class="form_detail_e"><td>番号A: </td><td>
+			<input type="text" name="no_a" class="valid" value=""  pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+			<label class="text-danger" for="no_a"></label>
+		</td></tr>
+		<tr class="form_detail_e"><td>番号B: </td><td>
+			<input type="text" name="no_b" class="valid" value=""  pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+			<label class="text-danger" for="no_b"></label>
+		</td></tr>
+		<tr class="form_detail_e"><td>rec_title: </td><td>
+			<input type="text" name="rec_title" class="valid" value=""  maxlength="50" title="50文字以内で入力してください" />
+			<label class="text-danger" for="rec_title"></label>
+		</td></tr>
 
+		<tr class="form_detail_e"><td>親ID: </td><td>
+			<input type="text" name="parent_id" class="valid" value=""  pattern="^[0-9]$" maxlength="11" title="数値（自然数）を入力してください" />
+			<label class="text-danger" for="parent_id"></label>
+		</td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >参照URL: </div>
-			<div class='cbf_input'>
-				<input type="text" name="ref_url" class="valid " value=""  maxlength="2083" title="2083文字以内で入力してください" />
-				<label class="text-danger" for="ref_url"></label>
-			</div>
-		</div>
+		<tr class="form_detail_e"><td>公開: </td><td>
+			<input type="checkbox" name="public_flg" class="valid"/>
+			<label class="text-danger" for="public_flg" ></label>
+		</td></tr>
 
+		<tr class="form_detail_e"><td>削除：<input type="checkbox" name="delete_flg" class="valid"  /> </td><td></td></tr>
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号A: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="no_a" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号B: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="no_b" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >rec_title: </div>
-			<div class='cbf_input'>
-				<input type="text" name="rec_title" class="valid " value=""  maxlength="50" title="50文字以内で入力してください" />
-				<label class="text-danger" for="rec_title"></label>
-			</div>
-		</div>
+		<!-- CBBXE -->
+	</tbody></table>
+	
+	
 
+	<button type="button"  onclick="editReg();" class="btn btn-success reg_btn" style="margin-top:4px">
+		<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
+	</button>
+	<hr>
+	
+	<input type="button" value="更新情報" class="btn btn-default btn-xs" onclick="$('#ajax_crud_edit_form_update').toggle(300)" /><br>
+	<aside id="ajax_crud_edit_form_update" style="display:none">
+		更新日時: <span class="modified"></span><br>
+		生成日時: <span class="created"></span><br>
+		ユーザー名: <span class="update_user"></span><br>
+		IPアドレス: <span class="ip_addr"></span><br>
+		ユーザーエージェント: <span class="user_agent"></span><br>
+	</aside>
+	
 
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >親ID: </div>
-			<div class='cbf_input'>
-				<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="parent_id" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >公開: </div>
-			<div class='cbf_input'>
-				<input type="checkbox" name="public_flg" class="valid"/>
-				<label class="text-danger" for="public_flg" ></label>
-			</div>
-		</div>
-
-			<div class="cbf_inp_wrap">
-				<div class='cbf_inp_label' >削除：</div>
-				<div class='cbf_input'>
-					<input type="checkbox" name="delete_flg" class="valid"  />
-				</div>
-			</div>
-
-			<!-- CBBXE -->
-			
-			<div style="clear:both"></div>
-			<div class="cbf_inp_wrap">
-				<button type="button"  onclick="editReg();" class="btn btn-success reg_btn">
-					<span class="glyphicon glyphicon-ok reg_btn_msg"></span>
-				</button>
-			</div>
-			
-			<div class="cbf_inp_wrap" style="padding:5px;">
-				<input type="button" value="更新情報" class="btn btn-default btn-xs" onclick="$('#ajax_crud_edit_form_update').toggle(300)" /><br>
-				<aside id="ajax_crud_edit_form_update" style="display:none">
-					更新日時: <span class="modified"></span><br>
-					生成日時: <span class="created"></span><br>
-					ユーザー名: <span class="update_user"></span><br>
-					IPアドレス: <span class="ip_addr"></span><br>
-					ユーザーエージェント: <span class="user_agent"></span><br>
-				</aside>
-			</div>
-		</div>
-	</td></tr>
-</table>
-
-
-
-
+	</div><!-- panel-body -->
+</div>
 
 
 

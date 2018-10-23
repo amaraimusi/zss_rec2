@@ -12,9 +12,10 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2018-10-12
- * @version 2.5.6
+ * @date 2016-9-21 | 2018-10-21
+ * @version 2.6.2
  * @histroy
+ * 2018-10-21 v2.6.0 フォームをアコーディオン形式にする。
  * 2018-10-9 v2.5.6 ノート詳細開き機能
  * 2018-10-9 v2.5.1 経由ディレクトリパスに対応
  * 2018-10-2 v2.5.0 フォームドラッグとリサイズ
@@ -44,6 +45,7 @@
  *  - auto_close_flg	自動閉フラグ	0:自動で閉じない（デフォルト）  1:フォームの外側をクリックすると自動的に閉じる
  *  - ni_tr_place	新規入力追加場所フラグ 0:末尾(デフォルト） , 1:先頭
  *  - drag_and_resize_flg フォームドラッグとリサイズのフラグ 0:OFF , 1:ON(デフォルト)
+ *  - form_mode フォームモード 0:ダイアログモード , 1:アコーディオンモード(デフォルト）
  *  
  *  @param array fieldData フィールドデータ（フィールド名の配列。フィード名の順番は列並びと一致していること）
  */
@@ -111,6 +113,10 @@ class CrudBase{
 		
 		// エラータイプリストによるエラー処理
 		this._errByErrTypes();
+
+		this.actEditForm; // アクティブ編集フォームオブジェクト
+		
+		this.activeTr; // アクティブTR要素
 		
 	}
 	
@@ -363,8 +369,19 @@ class CrudBase{
 			callBack(c_param);
 		}
 
-		// triggerElm要素の下付近に入力フォームを表示する。
-		this._showForm(form,elm,option);
+		if(this.param.form_mode == 1){
+			
+			// 表示とついでにtrとtd要素をblockにする。
+			form.css('display','block');
+			form.find('td').css('display','block');
+			form.insertAfter('#new_inp_form_point');
+			
+		}else{
+			// triggerElm要素の下付近に入力フォームを表示する。
+			this._showForm(form,elm,option);
+			
+		}
+		
 	}
 
 
@@ -379,8 +396,9 @@ class CrudBase{
 		
 		if(option == null) option = {};
 
-		var tr=jQuery(elm).parents('tr'); // 先祖をさかのぼりtr要素を取得する
-		this.param.active_row_index = tr.index(); // 行番（インデックス）を取得する
+		var tr = jQuery(elm).parents('tr'); // 先祖をさかのぼりtr要素を取得する
+
+		this.activeTr = tr;; // アクティブTR要素にセット
 
 		var info = this.formInfo['edit'];
 
@@ -391,9 +409,11 @@ class CrudBase{
 
 		// フォームに親要素内の各フィールド値をセットする。
 		this.setFieldsToForm('edit',ent,option);
-
-		var form = jQuery(info.slt);// 編集フォーム要素を取得
-
+		
+		// 編集フォーム要素を取得
+		var form = this.getForm('edit');
+		form.show();
+		
 		// バリデーションエラーメッセージをクリアする
 		this._clearValidErr(form);
 
@@ -402,8 +422,22 @@ class CrudBase{
 			callBack(tr,form,ent);
 		}
 
-		// triggerElm要素の下付近に入力フォームを表示する。
-		this._showForm(form,elm,option);
+		
+		if(this.param.form_mode == 1){
+			
+			// フォームのcolspan属性に列数をセットする。
+			form = this._setColspanToForm(form);
+			
+			// TR要素の下に編集フォームを移動する
+			form.insertAfter(tr);
+		}
+		else{
+			// triggerElm要素の下付近に入力フォームを表示する。
+			this._showForm(form,elm,option);			
+		}
+
+		
+
 	}
 
 
@@ -422,7 +456,7 @@ class CrudBase{
 	copyShow(elm,option,callBack){
 
 		var tr=jQuery(elm).parents('tr'); // 先祖をさかのぼりtr要素を取得する
-		this.param.active_row_index = tr.index(); // 行番（インデックス）を取得する
+		this.activeTr = tr;; // アクティブTR要素にセット
 
 		var info = this.formInfo['new_inp'];
 
@@ -450,9 +484,30 @@ class CrudBase{
 		if(callBack){
 			callBack(tr,form,ent);
 		}
+		
+		if(this.param.form_mode == 1){
+			
+			// フォームのcolspan属性に列数をセットする。
+			form = this._setColspanToForm(form);
+			
+			// 現在表示中の列数を取得する
+			var clm_cnt = this._getClmCntByActive();
+			
+			// 表示とついでにtrとtd要素をblockにする。
+			form.css('display','table-row');
+			var td = form.find('td');
+			td.attr('colspan', clm_cnt);
+			td.css('display','table-cell');
+			
+			form.insertAfter(tr);
+			
+		}else{
+			// triggerElm要素の下付近に入力フォームを表示する。
+			this._showForm(form,elm,option);
+			
+		}
 
-		// triggerElm要素の下付近に入力フォームを表示する。
-		this._showForm(form,elm,option);
+
 
 	}
 
@@ -475,8 +530,8 @@ class CrudBase{
 		if(option['form_show_flg'] == null) option['form_show_flg'] = 0;
 
 		var tr = elm.parents('tr'); // 先祖をさかのぼりtr要素を取得する
-		this.param.active_row_index = tr.index(); // 行番（インデックス）を取得する
-		
+		this.activeTr = tr;; // アクティブTR要素にセット
+
 		// 削除フォーム表示フラグが1(表示）であるなら、削除フォームを表示する
 		if(option['form_show_flg'] == 1){
 			option['tr'] = tr;
@@ -502,8 +557,8 @@ class CrudBase{
 		if(option == null) option = {};
 
 		var tr = elm.parents('tr'); // 先祖をさかのぼりtr要素を取得する
-		this.param.active_row_index = tr.index(); // 行番（インデックス）を取得する
-		
+		this.activeTr = tr;; // アクティブTR要素にセット
+
 		this.enabledReg(option); // 有効登録
 	}
 
@@ -521,8 +576,7 @@ class CrudBase{
 		
 		if(!(elm instanceof jQuery)) elm = jQuery(elm);
 		var tr = elm.parents('tr'); // 先祖をさかのぼりtr要素を取得する
-		
-		this.param.active_row_index = tr.index(); // 行番（インデックス）を取得する
+		this.activeTr = tr;; // アクティブTR要素にセット
 
 		var info = this.formInfo['eliminate'];
 
@@ -700,9 +754,6 @@ class CrudBase{
 
 		// 登録ボタンを押せなくする
 		this._toggleRegBtn('edit',0);
-		
-		// アクティブ行インデックスを取得する
-		var index = this.param.active_row_index; 
 
 		// 編集フォームからエンティティを取得する。
 		var ent = this._getEntByForm('edit');
@@ -775,14 +826,14 @@ class CrudBase{
 					this._showErrToForm(ent['err'],'edit');
 					return;
 				}
+
+				// 編集中のTR要素を取得する
+				var tr = this._getTrInEditing();
 				
 				// 削除フラグがONである場合、削除中の行を一覧から隠す
 				if(this.param['kj_delete_flg'] == 0 && ent['delete_flg']==1){
-					this._hideTr(index);// 削除中の行を一覧から隠す
+					tr.hide();
 				}
-
-				// 編集中のTR要素を取得する
-				var tr = this.getTrInEditing();
 
 				// エンティティのIDとTR要素のIDが不一致である場合、ブラウザをリロードする
 				if(ent['id'] !=tr.find('.id').text()){
@@ -798,6 +849,9 @@ class CrudBase{
 						afterCallBack(ent);
 					}, 1);
 				}
+				
+				// 編集後の行は青くする
+				tr.css('background-color','#d7e6fd');
 	
 				this.closeForm('edit');// フォームを閉じる
 				
@@ -827,7 +881,7 @@ class CrudBase{
 
 		// 削除を実行
 		var delete_flg = 1;
-		this._deleteRegBase(ent,row_index,delete_flg,option)
+		this._deleteRegBase(ent,delete_flg,option)
 
 	}
 
@@ -846,13 +900,13 @@ class CrudBase{
 	eliminateReg (option){
 
 		if(option == null) option = {};
-		var row_index = this.param.active_row_index; // アクティブ行インデックス
+
 		var ent = this._getEntByForm('eliminate');// 抹消フォームからエンティティを取得する
 		option['eliminate_flg'] = 1; // 抹消フラグをONにする
 		
 		// 抹消を実行
 		var delete_flg = 1;
-		this._deleteRegBase(ent,row_index,delete_flg,option);
+		this._deleteRegBase(ent,delete_flg,option);
 
 	}
 
@@ -1053,19 +1107,17 @@ class CrudBase{
 
 		if(option == null) option = {};
 		if(option['caller_type']==null) option['caller_type'] = 0;
-	
-		var row_index = this.param.active_row_index; // アクティブ行インデックス
 
 		var ent;
 		if(option['caller_type'] == 0){
 			ent = this._getEntByForm('delete');// 削除フォームからエンティティを取得する
 		}else{
-			ent = this.getEntity(row_index);
+			ent = this.getEntity();
 		}
 
 		// 削除を実行
 		var delete_flg = 1;
-		this._deleteRegBase(ent,row_index,delete_flg,option);
+		this._deleteRegBase(ent,delete_flg,option);
 
 	}
 
@@ -1083,12 +1135,11 @@ class CrudBase{
 	enabledReg (option){
 
 		if(option == null) option = {};
-		var row_index = this.param.active_row_index; // アクティブ行インデックス
-		var ent = this.getEntity(row_index);
+		var ent = this.getEntity();
 
 		// 有効を実行
 		var delete_flg = 0;
-		this._deleteRegBase(ent,row_index,delete_flg,option);
+		this._deleteRegBase(ent,delete_flg,option);
 
 	}
 	
@@ -1099,7 +1150,6 @@ class CrudBase{
 	 * 基本的な削除機能
 	 * 
 	 * @param ent idを含むエンティティ
-	 * @param row_index 行番
 	 * @param delete_flg 削除フラグ
 	 * @param cbBeforeReg Ajax送信前(削除前）のコールバック（送信データを編集できる）
 	 * @param afterCallBack 削除後に実行するコールバック関数（省略可）
@@ -1111,7 +1161,7 @@ class CrudBase{
 	 * - eliminate_flg :抹消フラグ
 	 * @returns void
 	 */
-	_deleteRegBase(ent,row_index,delete_flg,option){
+	_deleteRegBase(ent, delete_flg, option){
 
 		if(!ent['id']) throw new Error('Not id');
 		
@@ -1187,10 +1237,11 @@ class CrudBase{
 
 			// 削除フラグが0(有効)である場合、HTMLテーブルの行を削除する
 			if(this.param.kjs.kj_delete_flg === 0 || this.param.kjs.kj_delete_flg === '0' || eliminate_flg == 1){
-				this._deleteRow(row_index);
+
+				this.activeTr.remove(); // アクティブ行を削除
 			}else{
 				
-				var tr = this.getTrInEditing();// 削除中の行要素を取得する
+				var tr = this._getTrInEditing();// 削除中の行要素を取得する
 				this._setEntityToEditTr(ent,tr);// TR要素にエンティティの値をセットする
 			}
 
@@ -1218,7 +1269,9 @@ class CrudBase{
 	 * @return TR要素
 	 */
 	getTr(row_index){
-
+		
+		if(row_index == null) return this.activeTr;
+		
 		var slt = '#' + this.param.tbl_slt + ' tbody tr';
 		var tr = jQuery(slt).eq(row_index);
 
@@ -1243,10 +1296,9 @@ class CrudBase{
 	 * 現在編集中の行要素を取得する
 	 * @return TR要素
 	 */
-	getTrInEditing(){
+	_getTrInEditing(){
 
-		var slt = '#' + this.param.tbl_slt + ' tbody tr:eq(' + this.param.active_row_index + ')';
-		var tr = jQuery(slt);
+		var tr = this.activeTr;
 
 		return tr;
 	}
@@ -1281,7 +1333,7 @@ class CrudBase{
 	 */
 	getTdInEditing(field){
 
-		var tr = this.getTrInEditing(); // 現在編集中のTR要素を取得する
+		var tr = this._getTrInEditing(); // 現在編集中のTR要素を取得する
 
 		var elm = tr.find('.' + field);
 		if(!elm[0]){
@@ -1296,14 +1348,10 @@ class CrudBase{
 
 	/**
 	 * 一覧テーブルの行番からエンティティを取得する
-	 * @param row_index 行番(-1は末行)
+	 * @param row_index 行番(-1は末行) 省略時はアクティブTR要素を取得
 	 * @return object エンティティ
 	 */
 	getEntity(row_index){
-		
-		if(row_index == null){
-			row_index = this.param.active_row_index;
-		}
 
 		// 行番を指定してTR要素を取得する
 		var tr = this.getTr(row_index);
@@ -1695,7 +1743,7 @@ class CrudBase{
 
 		// 現在編集中の行要素を取得する
 		if(tr==null){
-			var tr = this.getTrInEditing();
+			var tr = this._getTrInEditing();
 		}
 
 		// TR要素にエンティティをセットする
@@ -1816,23 +1864,6 @@ class CrudBase{
 		return v;
 	}
 
-	// 行番に紐づく行を隠す
-	_hideTr(row_index){
-
-		var tr = this.getTr(row_index);
-		tr.hide();
-	};
-
-	/**
-	 * 行版に紐づく行を削除する
-	 * @param row_index	行番
-	 * @returns
-	 */
-	_deleteRow(row_index){
-		var tr = this.getTr(row_index);
-		tr.remove();
-	}
-
 
 	/**
 	 * フォームからエンティティを取得する
@@ -1842,7 +1873,7 @@ class CrudBase{
 	_getEntByForm(form_type){
 
 		// 現在編集中の行要素を取得する
-		var tr = this.getTrInEditing();
+		var tr = this._getTrInEditing();
 
 		// TR要素からエンティティを取得する
 		var ent = {};
@@ -1934,6 +1965,8 @@ class CrudBase{
 				form = jQuery('#' + this.param.edit_form_slt);
 			}
 			this.formEdit = form;
+			
+			
 
 		}else if(form_type=='delete'){
 
@@ -2228,11 +2261,6 @@ class CrudBase{
 			param['ni_tr_place'] = 0;
 		}
 
-		// アクティブ行インデックス
-		if(param['active_row_index'] == null){
-			param['active_row_index'] = 0;
-		}
-
 		// 表示フィルターデータ
 		if(param['disFilData'] == null){
 			param['disFilData'] = null;
@@ -2262,6 +2290,10 @@ class CrudBase{
 		
 		
 		if(param['drag_and_resize_flg'] == null) param['drag_and_resize_flg'] = 1;
+		
+		// フォームモード
+		if(param['form_mode'] == null) param['form_mode'] = 1
+		
 		
 		return param;
 	}
@@ -3011,7 +3043,10 @@ class CrudBase{
 			'show_flg':0,		// 表示制御フラグ（閉じるイベント制御用）
 			'form':newInpForm,	// フォーム要素
 		};
-		this._convertFormToDlg(formInfo.new_inp);// フォームをダイアログ化する。
+		// フォームモードがダイアログ型であるならフォームをダイアログ化する。
+		if(this.param.form_mode == 0){
+			this._convertFormToDlg(formInfo.new_inp);// フォームをダイアログ化する。
+		}
 
 		// 編集フォーム情報の設定
 		res = this._classifySlt(param['edit_form_slt']);
@@ -3022,7 +3057,10 @@ class CrudBase{
 			'show_flg':0,		// 表示制御フラグ（閉じるイベント制御用）
 			'form':editForm,	// フォーム要素
 		};
-		this._convertFormToDlg(formInfo.edit);// フォームをダイアログ化する。
+		// フォームモードがダイアログ型であるならフォームをダイアログ化する。
+		if(this.param.form_mode == 0){
+			this._convertFormToDlg(formInfo.edit);
+		}
 
 
 		// 削除フォーム情報の設定
@@ -3754,11 +3792,20 @@ class CrudBase{
 	 */
 	_fitForm(form){
 		
-		form.css({
-			'width':'auto',
-			'height':'auto',
-			'display':'inline-block',
-		});
+		if(this.param.form_mode == 1){
+			form.css({
+				'width':'auto',
+				'height':'auto',
+			});
+			
+		}else{
+			form.css({
+				'width':'auto',
+				'height':'auto',
+				'display':'inline-block',
+			});
+			
+		}
 	}
 	
 	
@@ -3769,8 +3816,12 @@ class CrudBase{
 	 */
 	_formDragAndResizeSetting(){
 		
-		this._formDragAndResizeSetting2('new_inp');
-		this._formDragAndResizeSetting2('edit');
+
+		if(this.param.form_mode == 0){
+			this._formDragAndResizeSetting2('new_inp');
+			this._formDragAndResizeSetting2('edit');
+		}
+		
 		this._formDragAndResizeSetting2('delete');
 		this._formDragAndResizeSetting2('eliminate');
 
@@ -3875,6 +3926,57 @@ class CrudBase{
 		
 	}
 	
+	
+	/**
+	 * フォームのcolspan属性に列数をセットする
+	 * @param jQuery form フォーム
+	 * @return 列数をセット後のjQueryフォーム
+	 */
+	_setColspanToForm(form){
+
+		// 現在表示中の列数を取得する
+		var clm_cnt = this._getClmCntByActive();
+		
+		// フォーム内のTD要素・colspan属性に列数をセットする。
+		form.find('td').attr('colspan',clm_cnt);
+		
+		return form;
+	}
+	
+	/**
+	 * 現在表示中の列数を取得する
+	 * @return int 列数
+	 */
+	_getClmCntByActive(){
+		// 表示中の列数を取得する
+		var cshAry = this.csh.getCshAry();
+		var clm_cnt = 1; // 列数 (最初の1はボタン類の列を表す）
+		for(var i in cshAry){
+			if(cshAry[i]) clm_cnt ++;
+		}
+		return clm_cnt;
+	}
+	
+	/**
+	 * フォームのcolspan属性に列数をセットする
+	 * @param jQuery form フォーム
+	 * @return 列数をセット後のjQueryフォーム
+	 */
+	_setColspanToTd(td){
+		
+		// 表示中の列数を取得する
+		var cshAry = this.csh.getCshAry();
+		var clm_cnt = 1; // 列数 (最初の1はボタン類の列を表す）
+		for(var i in cshAry){
+			if(cshAry[i]) clm_cnt ++;
+		}
+		
+		// フォーム内のTD要素・colspan属性に列数をセットする。
+		form.find('td').attr('colspan',clm_cnt);
+		
+		return form;
+	}
+
 
 }
 

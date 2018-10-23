@@ -79,15 +79,15 @@ foreach($data as $i=>$ent){
 	$this->FrontA->tdImage($ent,'img_fn','td_image');
 	
 	echo $ent['sub_img_list_html'];
-	
+
 	$this->FrontA->tdNote($ent,'note','td_note');
 	$this->FrontA->tdPlain($ent,'id');
 	$this->FrontA->tdPlain($ent,'rec_date');
-
 	// CBBXE
 	
 	echo "</tr>";
 }
+
 
 ?>
 </tbody>

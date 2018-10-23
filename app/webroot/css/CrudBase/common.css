@@ -218,3 +218,41 @@ border-radius: 35px;
 	border:none;
 }
 
+/* バージョン2.6のフォーム */
+.crud_base_form{
+	border:solid #3174af 2px;
+	background-color:#f2f2f2;
+	padding:5px;
+}
+.cbf_inp_wrap{
+	float:left;
+	margin-bottom:10px;
+}
+.cbf_inp_wrap_long{
+	float:left;
+	margin-bottom:10px;
+	width:100%;
+}
+.cbf_inp_label{
+	display:inline-block;
+	min-width:50px;
+}
+.cbf_inp_label_long{
+	
+}
+.cbf_input{
+	display:inline-block;
+	margin-right:60px;
+}
+.cbf_inp_wrap_long .cbf_input{
+	width:100%;
+	display:inline-block;
+	margin-right:0px;
+}
+.cbf_inp_wrap_long .cbf_input input{
+	width:100%;
+}
+.cbf_inp_wrap_long .cbf_input textarea{
+	width:100%;
+}
+

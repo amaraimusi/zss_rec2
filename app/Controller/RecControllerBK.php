@@ -45,7 +45,7 @@ class RecController extends CrudBaseController {
 	public $edit_validate = array();
 	
 	// 当画面バージョン (バージョンを変更すると画面に新バージョン通知とクリアボタンが表示されます。）
-	public $this_page_version = '1.9.1';
+	public $this_page_version = '1.9.1'; 	/// リソース保存先・ディレクトリパス・テンプレート
 	
 	/// リソース保存先・ディレクトリパス・テンプレート
 	public $dp_tmpl = '/photos/halther/%field/%via_dp/%dn/';
@@ -87,7 +87,6 @@ class RecController extends CrudBaseController {
 		$crudBaseData = $this->indexAfter($crudBaseData);//indexアクションの共通後処理
 		
 		// CBBXS-1020
-
 		// タイトルリスト
 		$titleIdList = $this->Rec->getTitleIdList();
 		$title_id_json = json_encode($titleIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -131,7 +130,6 @@ class RecController extends CrudBaseController {
 		//一覧データを取得
 		$data = $this->Rec->findData($crudBaseData);
 		
-
 		// サブ画像集約
 		$data = $this->Rec->aggSubImg($data,array(
 				'note_field' => 'note',
@@ -458,29 +456,29 @@ class RecController extends CrudBaseController {
 				
 				array('name'=>'kj_main','def'=>null),
 				// CBBXS-1000 
-			array('name'=>'kj_id','def'=>null),
-			array('name'=>'kj_title_id','def'=>null),
-			array('name'=>'kj_rec_date','def'=>null),
-			array('name'=>'kj_note','def'=>null),
-			array('name'=>'kj_rec_ctg_id','def'=>null),
-			array('name'=>'kj_img_fn','def'=>null),
-			array('name'=>'kj_img_dp','def'=>null),
-			array('name'=>'kj_ref_url','def'=>null),
-			array('name'=>'kj_no_a','def'=>null),
-			array('name'=>'kj_no_b','def'=>null),
-			array('name'=>'kj_rec_title','def'=>null),
-			array('name'=>'kj_parent_id','def'=>null),
-			array('name'=>'kj_public_flg','def'=>null),
-			array('name'=>'kj_sort_no','def'=>null),
-			array('name'=>'kj_delete_flg','def'=>0),
-			array('name'=>'kj_update_user','def'=>null),
-			array('name'=>'kj_ip_addr','def'=>null),
-			array('name'=>'kj_created','def'=>null),
-			array('name'=>'kj_modified','def'=>null),
+				array('name'=>'kj_id','def'=>null),
+				array('name'=>'kj_title_id','def'=>null),
+				array('name'=>'kj_rec_date','def'=>null),
+				array('name'=>'kj_note','def'=>null),
+				array('name'=>'kj_rec_ctg_id','def'=>null),
+				array('name'=>'kj_img_fn','def'=>null),
+				array('name'=>'kj_img_dp','def'=>null),
+				array('name'=>'kj_ref_url','def'=>null),
+				array('name'=>'kj_no_a','def'=>null),
+				array('name'=>'kj_no_b','def'=>null),
+				array('name'=>'kj_rec_title','def'=>null),
+				array('name'=>'kj_parent_id','def'=>null),
+				array('name'=>'kj_public_flg','def'=>null),
+				array('name'=>'kj_sort_no','def'=>null),
+				array('name'=>'kj_delete_flg','def'=>0),
+				array('name'=>'kj_update_user','def'=>null),
+				array('name'=>'kj_ip_addr','def'=>null),
+				array('name'=>'kj_created','def'=>null),
+				array('name'=>'kj_modified','def'=>null),
 
 				// CBBXE
 				
-			array('name'=>'row_limit','def'=>20),
+				array('name'=>'row_limit','def'=>20),
 				
 		);
 		

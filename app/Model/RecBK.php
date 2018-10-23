@@ -370,8 +370,8 @@ class Rec extends AppModel {
 	}
 
 	// CBBXE
-	
-	
+
+
 	/**
 	 * サブ画像集約
 	 * @param array $data

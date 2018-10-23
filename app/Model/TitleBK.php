@@ -3,18 +3,18 @@ App::uses('Model', 'Model');
 App::uses('CrudBase', 'Model');
 
 /**
- * 記録のCakePHPモデルクラス
+ * タイトルのCakePHPモデルクラス
  *
- * @date 2015-9-16 | 2018-10-10
- * @version 3.1.2
+ * @date 2015-9-16 | 2018-10-3
+ * @version 3.1.0
  *
  */
-class Rec extends AppModel {
+class Title extends AppModel {
 
-	public $name='Rec';
+	public $name='Title';
 	
 	// 関連付けるテーブル CBBXS-1040
-	public $useTable = 'recs';
+	public $useTable = 'titles';
 
 	// CBBXE
 
@@ -31,12 +31,12 @@ class Rec extends AppModel {
 	}
 	
 	/**
-	 * 記録エンティティを取得
+	 * タイトルエンティティを取得
 	 *
-	 * 記録テーブルからidに紐づくエンティティを取得します。
+	 * タイトルテーブルからidに紐づくエンティティを取得します。
 	 *
-	 * @param int $id 記録ID
-	 * @return array 記録エンティティ
+	 * @param int $id タイトルID
+	 * @return array タイトルエンティティ
 	 */
 	public function findEntity($id){
 
@@ -52,7 +52,7 @@ class Rec extends AppModel {
 
 		$ent=array();
 		if(!empty($data)){
-			$ent=$data['Rec'];
+			$ent=$data['Title'];
 		}
 		
 
@@ -66,7 +66,7 @@ class Rec extends AppModel {
 	
 	/**
 	 * 一覧データを取得する
-	 * @return array 記録画面一覧のデータ
+	 * @return array タイトル画面一覧のデータ
 	 */
 	public function findData(&$crudBaseData){
 
@@ -124,10 +124,10 @@ class Rec extends AppModel {
 	private function dumpSql($option){
 		$dbo = $this->getDataSource();
 		
-		$option['table']=$dbo->fullTableName($this->Rec);
-		$option['alias']='Rec';
+		$option['table']=$dbo->fullTableName($this->Title);
+		$option['alias']='Title';
 		
-		$query = $dbo->buildStatement($option,$this->Rec);
+		$query = $dbo->buildStatement($option,$this->Title);
 		
 		Debugger::dump($query);
 	}
@@ -146,76 +146,47 @@ class Rec extends AppModel {
 		$this->CrudBase->sql_sanitize($kjs); // SQLサニタイズ
 		
 		if(!empty($kjs['kj_main'])){
-			$cnds[]="CONCAT( IFNULL(Rec.rec_date, '') ,IFNULL(Rec.note, ''),IFNULL(Rec.img_fn, ''),IFNULL(Rec.img_dp, ''),IFNULL(Rec.ref_url, ''),IFNULL(Rec.no_a, ''),IFNULL(Rec.no_b, ''),IFNULL(Rec.rec_title, '')) LIKE '%{$kjs['kj_main']}%'";
+			$cnds[]="CONCAT( IFNULL(Title.title_name, '') ,IFNULL(Title.note, '')) LIKE '%{$kjs['kj_main']}%'";
 		}
 		
 		// CBBXS-1003
 		if(!empty($kjs['kj_id']) || $kjs['kj_id'] ==='0' || $kjs['kj_id'] ===0){
-			$cnds[]="Rec.id = {$kjs['kj_id']}";
+			$cnds[]="Title.id = {$kjs['kj_id']}";
 		}
-		if(!empty($kjs['kj_title_id']) || $kjs['kj_title_id'] ==='0' || $kjs['kj_title_id'] ===0){
-			$cnds[]="Rec.title_id = {$kjs['kj_title_id']}";
+		if(!empty($kjs['kj_title_name'])){
+			$cnds[]="Title.title_name LIKE '%{$kjs['kj_title_name']}%'";
 		}
-		if(!empty($kjs['kj_rec_date'])){
-			$kj_rec_date = $kjs['kj_rec_date'];
-			$dtInfo = $this->CrudBase->guessDatetimeInfo($kj_rec_date);
-			$cnds[]="DATE_FORMAT(Rec.rec_date,'{$dtInfo['format_mysql_a']}') = DATE_FORMAT('{$dtInfo['datetime_b']}','{$dtInfo['format_mysql_a']}')";
+		if(!empty($kjs['kj_title_ctg_id']) || $kjs['kj_title_ctg_id'] ==='0' || $kjs['kj_title_ctg_id'] ===0){
+			$cnds[]="Title.title_ctg_id = {$kjs['kj_title_ctg_id']}";
 		}
 		if(!empty($kjs['kj_note'])){
-			$cnds[]="Rec.note LIKE '%{$kjs['kj_note']}%'";
+			$cnds[]="Title.note LIKE '%{$kjs['kj_note']}%'";
 		}
-		if(!empty($kjs['kj_rec_ctg_id']) || $kjs['kj_rec_ctg_id'] ==='0' || $kjs['kj_rec_ctg_id'] ===0){
-			$cnds[]="Rec.rec_ctg_id = {$kjs['kj_rec_ctg_id']}";
-		}
-		if(!empty($kjs['kj_img_fn'])){
-			$cnds[]="Rec.img_fn LIKE '%{$kjs['kj_img_fn']}%'";
-		}
-		if(!empty($kjs['kj_img_dp'])){
-			$cnds[]="Rec.img_dp LIKE '%{$kjs['kj_img_dp']}%'";
-		}
-		if(!empty($kjs['kj_ref_url'])){
-			$cnds[]="Rec.ref_url LIKE '%{$kjs['kj_ref_url']}%'";
-		}
-		if(!empty($kjs['kj_no_a']) || $kjs['kj_no_a'] ==='0' || $kjs['kj_no_a'] ===0){
-			$cnds[]="Rec.no_a = {$kjs['kj_no_a']}";
-		}
-		if(!empty($kjs['kj_no_b']) || $kjs['kj_no_b'] ==='0' || $kjs['kj_no_b'] ===0){
-			$cnds[]="Rec.no_b = {$kjs['kj_no_b']}";
-		}
-		if(!empty($kjs['kj_rec_title'])){
-			$cnds[]="Rec.rec_title LIKE '%{$kjs['kj_rec_title']}%'";
-		}
-		if(!empty($kjs['kj_parent_id']) || $kjs['kj_parent_id'] ==='0' || $kjs['kj_parent_id'] ===0){
-			$cnds[]="Rec.parent_id = {$kjs['kj_parent_id']}";
-		}
-		$kj_public_flg = $kjs['kj_public_flg'];
-		if(!empty($kjs['kj_public_flg']) || $kjs['kj_public_flg'] ==='0' || $kjs['kj_public_flg'] ===0){
-			if($kjs['kj_public_flg'] != -1){
-				$cnds[]="Rec.public_flg = {$kjs['kj_public_flg']}";
-			}
+		if(!empty($kjs['kj_public_flg'])){
+			$cnds[]="Title.public_flg = {$kjs['kj_public_flg']}";
 		}
 		if(!empty($kjs['kj_sort_no']) || $kjs['kj_sort_no'] ==='0' || $kjs['kj_sort_no'] ===0){
-			$cnds[]="Rec.sort_no = {$kjs['kj_sort_no']}";
+			$cnds[]="Title.sort_no = {$kjs['kj_sort_no']}";
 		}
 		$kj_delete_flg = $kjs['kj_delete_flg'];
 		if(!empty($kjs['kj_delete_flg']) || $kjs['kj_delete_flg'] ==='0' || $kjs['kj_delete_flg'] ===0){
 			if($kjs['kj_delete_flg'] != -1){
-			   $cnds[]="Rec.delete_flg = {$kjs['kj_delete_flg']}";
+			   $cnds[]="Title.delete_flg = {$kjs['kj_delete_flg']}";
 			}
 		}
 		if(!empty($kjs['kj_update_user'])){
-			$cnds[]="Rec.update_user LIKE '%{$kjs['kj_update_user']}%'";
+			$cnds[]="Title.update_user LIKE '%{$kjs['kj_update_user']}%'";
 		}
 		if(!empty($kjs['kj_ip_addr'])){
-			$cnds[]="Rec.ip_addr LIKE '%{$kjs['kj_ip_addr']}%'";
+			$cnds[]="Title.ip_addr LIKE '%{$kjs['kj_ip_addr']}%'";
 		}
 		if(!empty($kjs['kj_created'])){
 			$kj_created=$kjs['kj_created'].' 00:00:00';
-			$cnds[]="Rec.created >= '{$kj_created}'";
+			$cnds[]="Title.created >= '{$kj_created}'";
 		}
 		if(!empty($kjs['kj_modified'])){
 			$kj_modified=$kjs['kj_modified'].' 00:00:00';
-			$cnds[]="Rec.modified >= '{$kj_modified}'";
+			$cnds[]="Title.modified >= '{$kj_modified}'";
 		}
 
 		// CBBXE
@@ -232,13 +203,13 @@ class Rec extends AppModel {
 	/**
 	 * エンティティをDB保存
 	 *
-	 * 記録エンティティを記録テーブルに保存します。
+	 * タイトルエンティティをタイトルテーブルに保存します。
 	 *
-	 * @param array $ent 記録エンティティ
+	 * @param array $ent タイトルエンティティ
 	 * @param array $option オプション
 	 *  - form_type フォーム種別  new_inp:新規入力 , copy:複製 , edit:編集
 	 *  - ni_tr_place 新規入力追加場所フラグ 0:末尾 , 1:先頭
-	 * @return array 記録エンティティ（saveメソッドのレスポンス）
+	 * @return array タイトルエンティティ（saveメソッドのレスポンス）
 	 */
 	public function saveEntity($ent,$option=array()){
 
@@ -258,10 +229,10 @@ class Rec extends AppModel {
 		//DBからエンティティを取得
 		$ent = $this->find('first',
 				array(
-						'conditions' => "id={$ent['Rec']['id']}"
+						'conditions' => "id={$ent['Title']['id']}"
 				));
 
-		$ent=$ent['Rec'];
+		$ent=$ent['Title'];
 		if(empty($ent['delete_flg'])) $ent['delete_flg'] = 0;
 
 		return $ent;
@@ -306,25 +277,23 @@ class Rec extends AppModel {
 	 * 
 	 * @param int $id
 	 * @param string $fn_field_strs ファイルフィールド群文字列（複数ある場合はコンマで連結）
-	 * @param array $ent エンティティ
-	 * @param string $dp_tmpl ディレクトリパス・テンプレート
-	 * @param string $viaDpFnMap 中継パスマッピング
+	 * @param array $dtpData ディレクトリパステンプレート情報
 	 */
-	public function eliminateFiles($id, $fn_field_strs, &$ent, $dp_tmpl, $viaDpFnMap){
-		$this->CrudBase->eliminateFiles($this, $id, $fn_field_strs, $ent, $dp_tmpl, $viaDpFnMap);
+	public function eliminateFiles($id,$fn_field_strs,&$dtpData){
+		$this->CrudBase->eliminateFiles($this,$id,$fn_field_strs,$dtpData);
 	}
 	
 	
 	// CBBXS-1021
 	/**
-	 * タイトルリストをDBから取得する
+	 * タイトルカテゴリリストをDBから取得する
 	 */
-	public function getTitleIdList(){
-		if(empty($this->Title)){
-			App::uses('Title','Model');
-			$this->Title=ClassRegistry::init('Title');
+	public function getTitleCtgIdList(){
+		if(empty($this->TitleCtg)){
+			App::uses('TitleCtg','Model');
+			$this->TitleCtg=ClassRegistry::init('TitleCtg');
 		}
-		$fields=array('id','title_name');//SELECT情報
+		$fields=array('id','title_ctg_name');//SELECT情報
 		$conditions=array("delete_flg = 0");//WHERE情報
 		$order=array('sort_no');//ORDER情報
 		$option=array(
@@ -333,61 +302,17 @@ class Rec extends AppModel {
 				'order'=>$order,
 		);
 
-		$data=$this->Title->find('all',$option); // DBから取得
+		$data=$this->TitleCtg->find('all',$option); // DBから取得
 		
 		// 構造変換
 		if(!empty($data)){
-			$data = Hash::combine($data, '{n}.Title.id','{n}.Title.title_name');
-		}
-		
-		return $data;
-	}
-	/**
-	 * 記録カテゴリリストをDBから取得する
-	 */
-	public function getRecCtgIdList(){
-		if(empty($this->RecCtg)){
-			App::uses('RecCtg','Model');
-			$this->RecCtg=ClassRegistry::init('RecCtg');
-		}
-		$fields=array('id','rec_ctg_name');//SELECT情報
-		$conditions=array("delete_flg = 0");//WHERE情報
-		$order=array('sort_no');//ORDER情報
-		$option=array(
-				'fields'=>$fields,
-				'conditions'=>$conditions,
-				'order'=>$order,
-		);
-
-		$data=$this->RecCtg->find('all',$option); // DBから取得
-		
-		// 構造変換
-		if(!empty($data)){
-			$data = Hash::combine($data, '{n}.RecCtg.id','{n}.RecCtg.rec_ctg_name');
+			$data = Hash::combine($data, '{n}.TitleCtg.id','{n}.TitleCtg.title_ctg_name');
 		}
 		
 		return $data;
 	}
 
 	// CBBXE
-	
-	
-	/**
-	 * サブ画像集約
-	 * @param array $data
-	 * @param array $param パラメータ
-	 *  - note_field ノートフィールド名
-	 *  - img_field 画像フィールド名
-	 *  - img_via_dp_field 画像経由パスフィールド名
-	 *  - dp_tmpl ディレクトリパス・テンプレート
-	 * @return array 集約後のデータ
-	 */
-	public function aggSubImg(&$data, $param){
-		
-		App::uses('SubImgAgg', 'Vendor/Wacg');
-		$subImgAgg = new SubImgAgg();
-		$data2 = $subImgAgg->agg($data,$param);
-		return $data2;
-		
-	}
+
+
 }
