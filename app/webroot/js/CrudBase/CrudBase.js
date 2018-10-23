@@ -12,8 +12,8 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2018-10-21
- * @version 2.6.2
+ * @date 2016-9-21 | 2018-10-23
+ * @version 2.6.3
  * @histroy
  * 2018-10-21 v2.6.0 フォームをアコーディオン形式にする。
  * 2018-10-9 v2.5.6 ノート詳細開き機能
@@ -493,11 +493,18 @@ class CrudBase{
 			// 現在表示中の列数を取得する
 			var clm_cnt = this._getClmCntByActive();
 			
-			// 表示とついでにtrとtd要素をblockにする。
-			form.css('display','table-row');
+			// tdのcolspan属性に表示中の列数をセットする
 			var td = form.find('td');
 			td.attr('colspan', clm_cnt);
-			td.css('display','table-cell');
+			
+			// SPモードの場合はblock, PCモードの場合はtable系にする。
+			if(this.param.device_type == 'sp'){
+				td.css('display','block');
+				form.css('display','block');
+			}else{
+				td.css('display','table-cell');
+				form.css('display','table-row');
+			}
 			
 			form.insertAfter(tr);
 			

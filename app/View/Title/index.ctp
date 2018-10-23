@@ -261,7 +261,7 @@ foreach($data as $i=>$ent){
 
 
 	<!-- 編集フォーム -->
-	<tr id="ajax_crud_edit_form" class="crud_base_form"><td colspan='5'>
+	<tr id="ajax_crud_edit_form" class="crud_base_form" style="display:none"><td colspan='5'>
 		<div  style='width:100%'>
 	
 			<div>

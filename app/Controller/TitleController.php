@@ -51,10 +51,10 @@ class TitleController extends CrudBaseController {
 
 	public function beforeFilter() {
 
-		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
-		if(empty($this->Auth->user())){
-			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
-		}
+// 		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+// 		if(empty($this->Auth->user())){
+// 			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+// 		}
 	
 		parent::beforeFilter();
 	

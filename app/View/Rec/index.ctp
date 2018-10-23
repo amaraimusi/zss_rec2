@@ -131,7 +131,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 
 <div id="crud_base_auto_save_msg" style="height:20px;" class="text-success"></div>
 <!-- 一覧テーブル -->
-<table id="rec_tbl" border="1"  class="table table-striped table-bordered table-condensed">
+<table id="rec_tbl" border="1"  class="table table-striped table-bordered table-condensed" style="display:none">
 
 <thead>
 <tr>
@@ -338,7 +338,7 @@ foreach($data as $i=>$ent){
 
 
 	<!-- 編集フォーム -->
-	<tr id="ajax_crud_edit_form" class="crud_base_form"><td colspan='5'>
+	<tr id="ajax_crud_edit_form" class="crud_base_form" style="display:none"><td colspan='5'>
 		<div  style='width:100%'>
 	
 			<div>
@@ -496,7 +496,7 @@ foreach($data as $i=>$ent){
 
 
 <!-- 削除フォーム -->
-<div id="ajax_crud_delete_form" class="panel panel-danger">
+<div id="ajax_crud_delete_form" class="panel panel-danger" style="display:none">
 
 	<div class="panel-heading">
 		<div class="pnl_head1">削除</div>
@@ -551,7 +551,7 @@ foreach($data as $i=>$ent){
 
 
 <!-- 抹消フォーム -->
-<div id="ajax_crud_eliminate_form" class="panel panel-danger">
+<div id="ajax_crud_eliminate_form" class="panel panel-danger" style="display:none">
 
 	<div class="panel-heading">
 		<div class="pnl_head1">抹消</div>

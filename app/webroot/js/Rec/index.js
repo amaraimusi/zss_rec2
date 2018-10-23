@@ -2,6 +2,9 @@
 
 $(function() {
 	init();//初期化
+	
+	$('#rec_tbl').show();
+	
 });
 
 

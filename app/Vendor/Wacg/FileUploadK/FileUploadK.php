@@ -9,9 +9,10 @@ require_once 'ThumbnailEx.php';
  * 「<input type = 'file'>」であるファイルアップロードのフォーム要素から送られてきたファイルデータを指定場所に保存する。
  * ファイルチェックや、画像形式ならサムネイル画像作成も行う。
  * 
- * @date 2018-6-30 | 2018-8-23
- * @version 1.1.1
+ * @date 2018-6-30 | 2018-10-23
+ * @version 1.1.2
  * @history
+ * 2018-10-23 ver 1.1.2 セパレータから始まるディレクトリの時に起こるバグを修正
  * 2018-8-23 ver1.1 optionにfn(ファイル名)を指定できるようにした。
  * 2018-8-22 ver1.0 リリース
  * 2018-6-30 開発開始
@@ -511,9 +512,9 @@ class FileUploadK{
 			foreach($thums as $thEnt){
 
 				$thum_dp = $thEnt['thum_dp'];
+				$this->makeDirEx($thum_dp); // ディレクトリパスが存在しないなら作成する（ホームルートを付加するとバグになるので注意）
 				$thum_dp = $this->plusHomePath($thum_dp); // ファイルパスの先頭がセパレータであるならホームルートパスを付加する。
-				$this->makeDirEx($thum_dp); // ディレクトリパスが存在しないなら作成する
-	
+
 				$thum_fp = $this->connectPath($thum_dp,$fEnt['fn']); // ディレクトリパスとファイル名を連結する。
 				
 				$thum_width = null;
@@ -544,8 +545,9 @@ class FileUploadK{
 		// ファイルパスの先頭がセパレータであるならホームルートパスを付加する。
 		if($s1 == '/' || $s1 == DIRECTORY_SEPARATOR){
 			$fp = $_SERVER['DOCUMENT_ROOT'] . $fp;
+			$fp = str_replace($s1.$s1, $s1, $fp); // 2重セパレータを置換する
 		}
-		
+
 		return $fp;
 	}
 	
@@ -557,18 +559,20 @@ class FileUploadK{
 	 * @return string ファイルパス
 	 */
 	private function connectPath($dp,$fn){
-		
+
 		if(empty($dp)) return $fn;
 		
 		$es1 = mb_substr($dp,-1); // ディレクトリパスから末尾の一文字を取得
 		$fp = ''; // ファイルパス
 		
-		if($es1 == '/' || $es1 == "\\"){
+		if($es1 == '/' || $es1 == '\\'){
 			$fp = $dp . $fn;
 		}else{
 			$sep = $this->getPathSeparator($dp); // ディレクトリパスからパスセパレータを取得する
 			$fp = $dp . $sep . $fn;
 		}
+
+		$fp = str_replace($es1.$es1, $es1, $fp); // 2重セパレータを置換する
 		
 		return $fp;
 		
@@ -586,8 +590,8 @@ class FileUploadK{
 		if(strpos($path,"/")!==false){
 			return "/";
 		}
-		if(strpos($path,"\\")!==false){
-			return "\\";
+		if(strpos($path,'\\')!==false){
+			return '\\';
 		}
 		return DIRECTORY_SEPARATOR;
 		
