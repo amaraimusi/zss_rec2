@@ -39,32 +39,6 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 <!-- 一覧テーブル -->
 <table id="rec_tbl" border="1"  class="table_transform">
 
-<thead>
-<tr>
-	<!-- CBBXS-1050 -->
-	<th>ID</th>
-	<th>タイトル</th>
-	<th>記録日付</th>
-	<th>ノート</th>
-	<th>記録カテゴリ</th>
-	<th>画像</th>
-	<th>画像ディレクトリパス</th>
-	<th>参照URL</th>
-	<th>番号A</th>
-	<th>番号B</th>
-	<th>rec_title</th>
-	<th>親ID</th>
-	<th>公開</th>
-	<th>順番</th>
-	<th>削除</th>
-	<th>更新者</th>
-	<th>IPアドレス</th>
-	<th>生成日時</th>
-	<th>更新日時</th>
-
-	<!-- CBBXE -->
-</tr>
-</thead>
 <tbody>
 <?php
 

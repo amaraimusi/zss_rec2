@@ -114,6 +114,81 @@ class Rec extends AppModel {
 		
 		return $data2;
 	}
+	
+	
+	
+	
+	/**
+	 * 一覧データを取得する(フロントA用）
+	 * @return array 記録画面一覧のデータ
+	 */
+	public function findDataForFrontA(&$crudBaseData){
+		
+		//SELECT情報
+		$fields=array(
+				'Rec.*',
+				'Title.title_name',
+		);
+		
+		$kjs = $crudBaseData['kjs'];//検索条件情報
+		$pages = $crudBaseData['pages'];//ページネーション情報
+		
+		
+		$page_no = $pages['page_no']; // ページ番号
+		$row_limit = $pages['row_limit']; // 表示件数
+		$sort_field = $pages['sort_field']; // ソートフィールド
+		$sort_desc = $pages['sort_desc']; // ソートタイプ 0:昇順 , 1:降順
+		
+		
+		//条件を作成
+		$conditions=$this->createKjConditions($kjs);
+		
+		// オフセットの組み立て
+		$offset=null;
+		if(!empty($row_limit)) $offset = $page_no * $row_limit;
+		
+		// ORDER文の組み立て
+		$order = $sort_field;
+		if(empty($order)) $order='sort_no';
+		if(!empty($sort_desc)) $order .= ' DESC';
+		
+		//JOIN情報
+		$joins = array(
+				array(
+						'type'       => 'left',
+						'table'      => 'titles',
+						'alias'      => 'Title',
+						'conditions' => array(
+								'Rec.title_id = Title.id',
+						),
+				),
+
+		);
+		
+		$option=array(
+				'fields'=>$fields,
+				'conditions' => $conditions,
+				'joins'=>$joins,
+				'limit' =>$row_limit,
+				'offset'=>$offset,
+				'order' => $order,
+		);
+		
+		//DBからデータを取得
+		$data = $this->find('all',$option);
+		
+		//データ構造を変換（2次元配列化）
+		$data2=array();
+		foreach($data as $i=>$tbl){
+			foreach($tbl as $ent){
+				foreach($ent as $key => $v){
+					$data2[$i][$key]=$v;
+				}
+			}
+		}
+		
+		return $data2;
+	}
 
 	
 	

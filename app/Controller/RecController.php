@@ -132,7 +132,7 @@ class RecController extends CrudBaseController {
 		$crudBaseData = $this->indexBefore('Rec',$option);//indexアクションの共通先処理(CrudBaseController)
 		
 		//一覧データを取得
-		$data = $this->Rec->findData($crudBaseData);
+		$data = $this->Rec->findDataForFrontA($crudBaseData);
 		
 
 		// サブ画像集約
@@ -146,25 +146,16 @@ class RecController extends CrudBaseController {
 		// CrudBase共通処理（後）
 		$crudBaseData = $this->indexAfter($crudBaseData,['method_url'=>'front_a']);//indexアクションの共通後処理
 		
-		// CBBXS-1020-2
-
-		// タイトルリスト
-		$titleIdList = $this->Rec->getTitleIdList();
-		$title_id_json = json_encode($titleIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
-		$this->set(array('titleIdList' => $titleIdList,'title_id_json' => $title_id_json));
-
-		// 記録カテゴリリスト
-		$recCtgIdList = $this->Rec->getRecCtgIdList();
-		$rec_ctg_id_json = json_encode($recCtgIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
-		$this->set(array('recCtgIdList' => $recCtgIdList,'rec_ctg_id_json' => $rec_ctg_id_json));
-
-		// CBBXE
+		$title_name = 'None';
+		if(!empty($data)){
+			$title_name = $data[0]['title_name'] . ' | ワクガンス';
+		}
 		
 		$this->set($crudBaseData);
 		$this->setCommon();//当画面系の共通セット
 		$this->set(array(
 				'header' => 'front_a_header',
-				'title_for_layout'=>'記録',
+				'title_for_layout'=>$title_name,
 				'data'=> $data,
 		));
 		
