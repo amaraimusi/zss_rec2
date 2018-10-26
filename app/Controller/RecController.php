@@ -120,6 +120,7 @@ class RecController extends CrudBaseController {
 	 */
 	public function front_a(){
 		
+		Configure::write('debug', 0);
 		
 		// フロントA用のコンポーネント
 		$this->RecFrontA = $this->Components->load('RecFrontA');
