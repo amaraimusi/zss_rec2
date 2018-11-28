@@ -12,9 +12,10 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2018-10-23
- * @version 2.6.4
+ * @date 2016-9-21 | 2018-11-28
+ * @version 2.6.6
  * @histroy
+ * 2018-10-21 v2.6.6 検索をGETクエリ方式にする
  * 2018-10-21 v2.6.0 フォームをアコーディオン形式にする。
  * 2018-10-9 v2.5.6 ノート詳細開き機能
  * 2018-10-9 v2.5.1 経由ディレクトリパスに対応
@@ -100,8 +101,11 @@ class CrudBase{
 		// CrudBase・ファイルアップロードコンポーネント
 		this.cbFileUploadComp = this._factoryCbFileUploadComponent();
 		
-		// カレンダー日付ピッカー・ラッパーコンポーネン
+		// カレンダー日付ピッカー・ラッパーコンポーネント
 		this.datepickerWrap = this._factoryDatepickerWrap();
+		
+		// ボタンサイズ変更コンポーネント
+		this.cbBtnSizeChanger = this._factoryCbBtnSizeChanger();
 		
 		this.fueIdCash; // file要素のid属性データ（キャッシュ）
 		
@@ -117,6 +121,17 @@ class CrudBase{
 		this.actEditForm; // アクティブ編集フォームオブジェクト
 		
 		this.activeTr; // アクティブTR要素
+		
+		this.hiddensElm; // 埋込データ要素
+		
+		this.formKjsElm; // 検索条件フォーム要素
+		
+		
+		// 初期戻しボタンにURLをセットする
+		this._iniRtnSetUrl();
+		
+		// 検索関連の入力要素にEnterイベントを組み込む
+		this._addEventForKjsEnter();
 		
 	}
 	
@@ -294,6 +309,31 @@ class CrudBase{
 		datepickerWrap = new DatepickerWrap(this);
 		
 		return datepickerWrap;
+		
+	}
+	
+	
+	/**
+	 * ボタンサイズ変更コンポーネントのファクトリーメソッド
+	 * @return CbBtnSizeChanger ボタンサイズ変更コンポーネント
+	 */
+	_factoryCbBtnSizeChanger(){
+		var cbBtnSizeChanger;
+		
+		// クラス（JSファイル）がインポートされていない場合、「空」の実装をする。
+		var t = typeof CbBtnSizeChanger;
+		if(t == null || t == 'undefined'){
+			// 「空」実装
+			cbBtnSizeChanger = {
+					'dummy':function(){},
+			}
+			return cbBtnSizeChanger
+		}
+		
+		// 自動保存機能の初期化
+		cbBtnSizeChanger = new CbBtnSizeChanger();
+		
+		return cbBtnSizeChanger;
 		
 	}
 	
@@ -3150,53 +3190,27 @@ class CrudBase{
 
 
 	/**
-	 * 検索
-	 * @param searchBtnElm 検索ボタン要素
-	 * @param <jquery object> formElm 検索入力フォーム (省略可)
-	 * @param option オプション (省略可)
+	 * 検索実行
 	 */
-	searchKjs(searchBtnElm,formElm,option){
-
-		// 検索ボタン要素をjQueryオブジェクトに変換する
-		var btnElm; // 検索ボタン要素
-		if(searchBtnElm instanceof jQuery){
-			btnElm = searchBtnElm;
-		}else{
-			btnElm = jQuery(searchBtnElm);
-		}
-
-		// オプションの初期セット
-		if(option == null){
-			option = {};
-		}
-		if(this._empty(option['form_slt'])){
-			option['form_slt'] = '.form_kjs';
-		}
-		if(this._empty(option['inp_slt'])){
-			option['inp_slt'] = '.kjs_inp';
-		}
+	searchKjs(){
 
 		// URLからパラメータを取得する
 		var param = this._getUrlQuery();
 
-		// form要素が空なら生成する
-		if(!formElm){
-			var form_slt = option['form_slt'];
-			formElm = btnElm.parents(form_slt);
-		}
-
+		var formElm = this._getFormKjsElm(); // 検索条件フォーム要素を取得する
+		
 		// form要素内の入力要素群をループする。
 		var kjs = {}; // 検索条件情報
 		var removes = []; // 除去リスト（入力が空の要素のフィールド）
-		var inp_slt =  option['inp_slt'];
-		formElm.find(inp_slt).each((i,elm)=>{
+		
+		formElm.find('.kjs_inp').each((i,elm)=>{
 
 			// 要素から選択値を取得する
 			var kjsElm = jQuery(elm);
 			var val = kjsElm.val();
 
 			// 選択値が空でない場合（0も空ではない扱い）
-			var field = kjsElm.attr('name'); // 要素のname属性から検索条件フィールドを取得する
+			var field = kjsElm.attr('id'); // 要素のID属性から検索条件フィールドを取得する
 			if(!this._emptyNotZero(val)){
 				val = encodeURIComponent(val); // 要素の値をURLエンコードする
 				kjs[field] = val; // 検索条件情報にセットする
@@ -3215,7 +3229,7 @@ class CrudBase{
 		}
 
 		// 1ページ目をセットする
-		param['kj_page_no'] = 0;
+		param['page_no'] = 0;
 
 		// パラメータからURLクエリを組み立てる
 		var query = '';
@@ -3984,7 +3998,99 @@ class CrudBase{
 		
 		return form;
 	}
+	
+	
+	/**
+	 * 初期戻しボタンにURLをセットする
+	 */
+	_iniRtnSetUrl(){
+		
+		var hiddensElm = this._getHiddensElm(); // hiddenデータ要素を取得（埋込データ要素）
 
+		var referer_url = hiddensElm.find('#referer_url').val(); // リファラURL
+		var now_url = hiddensElm.find('#now_url').val(); // 現在URL
+		
+		// GETクエリ部分を取り除いたURLを取得する
+		var r_url_b = this._stringLeft(referer_url, '?', 1);
+		var now_url_b = this._stringLeft(now_url, '?', 1);
+
+		var ini_rtn_url = ''; // 初期戻りURL
+		
+		// クエリ部分を除いたリファラURLと現在URLが一致するなら、ローカルストレージに保存してある初期戻りURLを取得する。
+		if(r_url_b == now_url_b){
+			ini_rtn_url = localStorage.getItem("crud_base_ini_rtn_url");
+			if(ini_rtn_url == null) ini_rtn_url =  now_url;
+		}else{
+			// 一致しないなら現在URLを初期戻りURLとして取得。またローカルストレージに保存する。
+			ini_rtn_url = now_url;
+			localStorage.setItem("crud_base_ini_rtn_url",ini_rtn_url);
+		}
+		
+		// 初期戻りボタンに初期戻りURLをセットする
+		jQuery('.ini_rtn').attr('href', ini_rtn_url);
+		
+	}
+	
+	/**
+	 * hiddenデータ要素を取得（埋込データ要素）
+	 */
+	_getHiddensElm(){
+		if(this.hiddensElm == null){
+			this.hiddensElm = jQuery('#hiddens_data');
+		}
+		return this.hiddensElm;
+	}
+	
+	/**
+	 * 文字列を左側から印文字を検索し、左側の文字を切り出す。
+	 * @date 2016-12-8 | 2018-11-28
+	 * @version 1.1
+	 * 
+	 * @param s 対象文字列
+	 * @param mark 印文字
+	 * @param not_find_flg 0:印文字が見つからないなら空を返す[デフォルト] , 1:見つからないならそのまま対象文字列を返す
+	 * @return 印文字から左側の文字列
+	 */
+	_stringLeft(s, mark, not_find_flg){
+
+		if (s==null || s=="") return s;
+		
+		var a=s.indexOf(mark);
+		if(a== -1){
+			if(not_find_flg == 1) return s;
+		}
+		
+		var s2=s.substring(0,a);
+		return s2;
+		
+	}
+	
+	/**
+	 * 検索関連の入力要素にEnterイベントを組み込む
+	 */
+	_addEventForKjsEnter(){
+		
+		var formKjsElm = this._getFormKjsElm(); // 検索条件フォーム要素を取得
+		
+		// 新規入力フォームのinput要素にEnterキー押下イベントを組み込む。
+		formKjsElm.find('input').keypress((e) => {
+			if(e.which==13){ // Enterキーが押下された場合
+				this.searchKjs(); // 検索実行
+			}
+		});
+		
+		
+	}
+	
+	/**
+	 * 検索条件フォーム要素を取得
+	 */
+	_getFormKjsElm(){
+		if(this.formKjsElm == null){
+			this.formKjsElm = jQuery('.form_kjs');
+		}
+		return this.formKjsElm;
+	}
 
 }
 

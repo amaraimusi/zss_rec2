@@ -1,5 +1,10 @@
+
+<div id="hiddens_data" style="display:none">
 <?php
 
+$this->CrudBase->hiddenX('base_url',$base_url);
+$this->CrudBase->hiddenX('referer_url',$referer_url);
+$this->CrudBase->hiddenX('now_url',$now_url);
 $this->CrudBase->hiddenX('act_flg',1);
 $this->CrudBase->hiddenX('page_no',$pages['page_no'] );
 $this->CrudBase->hiddenX('sort_field',$pages['sort_field'] );
@@ -16,3 +21,4 @@ $this->CrudBase->hiddenX('via_dp_fn_json',$via_dp_fn_json);
 $this->CrudBase->hiddenX('err_types_json',$err_types_json);
 
 ?>
+</div>

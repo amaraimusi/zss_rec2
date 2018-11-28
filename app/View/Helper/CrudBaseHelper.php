@@ -9,8 +9,8 @@ App::uses('CbFileUploadHComp', 'View/Helper/Component');
  * 検索条件入力フォームや、一覧テーブルのプロパティのラッパーを提供する
  * 
  * 
- * @version 1.6.6
- * @date 2016-7-27 | 2018-10-12
+ * @version 1.6.8
+ * @date 2016-7-27 | 2018-11-28
  * @author k-uehara
  *
  */
@@ -88,7 +88,7 @@ class CrudBaseHelper extends FormHelper {
 				//'jquery.datetimepicker.min',		// 日時ピッカー(重いので保留
 				'clm_show_hide',					// 列表示切替
 				'nouislider.min',					// 数値範囲入力スライダー・noUiSlider
-				'CrudBase/NoUiSliderWrap',			// noUiSliderのラップ
+				//'CrudBase/NoUiSliderWrap',			// noUiSliderのラップ(重いので保留
 				'CrudBase/FileUploadK.css?ver=1.0.1',	
 				'CrudBase/index'					// CRUD indexページ共通
 		);
@@ -109,13 +109,14 @@ class CrudBaseHelper extends FormHelper {
 				//'jquery.datetimepicker.full.min',// 日時ピッカー(重いので保留■■■□□□■■■□□□■■■□□□）
 				'CrudBase/DatepickerWrap',		// カレンダー日付ピッカー・ラッパークラス
 				'nouislider.min',				// 数値範囲入力スライダー・noUiSlider
-				'CrudBase/NoUiSliderWrap',		// noUiSliderのラップ
+				//'CrudBase/NoUiSliderWrap',		// noUiSliderのラップ(重いので保留）
 				'CrudBase/CrudBaseAutoSave.js?ver=1.0',
 				'CrudBase/CrudBaseRowExchange.js?ver=1.2',
 				'CrudBase/CrudBaseGadgetKj.js?ver=1.0',
 				'CrudBase/FileUploadK.js?ver=1.0',
 				'CrudBase/CbFileUploadComponent.js?ver=1.0',
-				'CrudBase/CrudBase.js?ver=2.4.2',
+				'CrudBase/CbBtnSizeChanger.js?ver=1.0.0', // ボタンサイズ変更
+				'CrudBase/CrudBase.js?ver=2.6.6',
 				'livipage',						// ページ内リンク先プレビュー
 				'ProcessWithMultiSelection',	// 一覧のチェックボックス複数選択による一括処理
 				'CrudBase/ImportFu.js',			// インポート・ファイルアップロードクラス
@@ -156,6 +157,7 @@ class CrudBaseHelper extends FormHelper {
 				'label' => false,
 				'placeholder' => '-- ID --',
 				'style'=>'width:100px',
+				'class' => 'kjs_inp',
 				'title'=>'IDによる検索',
 				'maxlength'=>8,
 		));
@@ -194,6 +196,7 @@ class CrudBaseHelper extends FormHelper {
 				'label' => false,
 				'placeholder' => $wamei,
 				'style'=>"width:{$width}px",
+				'class' => 'kjs_inp',
 				'title'=>$title,
 				'maxlength'=>$maxlength,
 		));
@@ -229,6 +232,7 @@ class CrudBaseHelper extends FormHelper {
 				'type' => 'text',
 				'label' => false,
 				'placeholder' => $wamei,
+				'class'=>"kjs_inp",
 				'style'=>"width:{$width}px",
 				'title'=>$title,
 				'maxlength'=>$maxlength,
@@ -270,7 +274,7 @@ class CrudBaseHelper extends FormHelper {
 			'value' => $kjs[$field],
 			'type' => 'hidden',
 			'data-field' => $field,
-			'class' => 'kj_wrap',
+			'class' => 'kj_wrap kjs_inp',
 		));
 		
 	}
@@ -304,6 +308,7 @@ class CrudBaseHelper extends FormHelper {
 				'default' => $kjs[$field],
 				'label' => false,
 				'style'=>"width:{$width}px",
+				'class' => 'kjs_inp',
 				'title'=>$title,
 		));	
 		echo "</div>\n";
@@ -351,6 +356,7 @@ class CrudBaseHelper extends FormHelper {
 			'type' => 'text',
 			'label' => false,
 			'placeholder' => $wamei,
+			'class' => 'kjs_inp',
 			'style'=>"width:{$width}px",
 			'title'=>$title,
 			'maxlength'=>$maxlength,
@@ -404,6 +410,7 @@ class CrudBaseHelper extends FormHelper {
 				'default' => $kjs[$field],
 				'label' => false,
 				'style' => "width:{$width}px",
+				'class' => 'kjs_inp',
 				'title' => $title,
 		));
 		echo "</div>\n";
@@ -431,6 +438,7 @@ class CrudBaseHelper extends FormHelper {
 			),
 			'default' => $kjs['kj_delete_flg'],
 			'label' => false,
+			'class' => 'kjs_inp',
 		));
 		echo "</div>\n";
 	}
@@ -459,6 +467,7 @@ class CrudBaseHelper extends FormHelper {
 			),
 			'default' => $kjs[$field],
 			'label' => false,
+			'class' => 'kjs_inp',
 		));
 		echo "</div>\n";
 	}
@@ -489,7 +498,8 @@ class CrudBaseHelper extends FormHelper {
 				),
 				'default' => $kjs['row_limit'],
 				'label' => false,
-				'style' => 'height:27px'
+				'style' => 'height:27px',
+				'class' => 'kjs_inp',
 		));
 		echo "</div>\n";
 	}
@@ -531,7 +541,7 @@ class CrudBaseHelper extends FormHelper {
 				'type' => 'text',
 				'label' => false,
 				'placeholder' => '-- '.$wamei.'年月 --',
-				'class' => 'datepicker',
+				'class' => 'datepicker kjs_inp',
 				'style'=>'width:100px;',
 		));
 		echo "</div>";
@@ -554,6 +564,7 @@ class CrudBaseHelper extends FormHelper {
 				'label' => false,
 				'placeholder' => '-- '.$wamei.'【範囲1】--',
 				'style'=>'width:150px',
+				'class' => 'kjs_inp',
 				'title'=>'入力日以降を検索',
 		));
 		echo "</div>";
@@ -568,6 +579,7 @@ class CrudBaseHelper extends FormHelper {
 				'label' => false,
 				'placeholder' => '-- '.$wamei.'【範囲2】--',
 				'style'=>'width:150px',
+				'class' => 'kjs_inp',
 				'title'=>'入力日以前を検索',
 		));
 		echo "</div>";
@@ -602,7 +614,7 @@ class CrudBaseHelper extends FormHelper {
 		
 		
 		echo "	<tr><td><div id='{$field}_slider' title='{$wamei}による範囲検索'></div></td>";
-		echo "	<td><input type='button' class='nusr_toggle_btn' value='' onclick=\"$('#{$detail_noui}').fadeToggle()\" title='日付範囲入力を表示します'></td>";
+		echo "	<td><input type='button' class='nusr_toggle_btn kjs_inp' value='' onclick=\"$('#{$detail_noui}').fadeToggle()\" title='日付範囲入力を表示します'></td>";
 		echo "	</tr>";
 		
 		
@@ -617,6 +629,7 @@ class CrudBaseHelper extends FormHelper {
 			'type' => 'number',
 			'label' => false,
 			'style'=>'width:50px',
+			'class' => 'kjs_inp',
 			'title'=>$wamei.'による範囲検索',
 		));
 			
@@ -629,6 +642,7 @@ class CrudBaseHelper extends FormHelper {
 			'type' => 'number',
 			'label' => false,
 			'style'=>'width:50px',
+			'class' => 'kjs_inp',
 			'title'=>$wamei.'による範囲検索',
 		));
 		

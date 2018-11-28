@@ -282,3 +282,10 @@ function tableTransform(mode_no){
 
 }
 
+/**
+ * 検索実行
+ */
+function searchKjs(){
+	crudBase.searchKjs();
+}
+

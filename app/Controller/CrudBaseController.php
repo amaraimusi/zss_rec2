@@ -11,7 +11,7 @@ App::uses('AppController', 'Controller');
 class CrudBaseController extends AppController {
 
 	///バージョン
-	var $version = "2.5.1";
+	var $version = "2.5.5";
 
 	///デフォルトの並び替え対象フィールド
 	var $defSortFeild='sort_no';
@@ -452,18 +452,21 @@ class CrudBaseController extends AppController {
 		
 
 		$kjs_json = json_encode($kjs,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
-		
-		// ホームＵＲＬを作成する
-		$home_url = $this->makeHomeUrl($crudBaseData,$pages,$base_url);
-		
+
 		// 行入替機能フラグを取得する
 		$row_exc_flg = $this->getRowExcFlg($crudBaseData,$pages);
+		
+		$referer_url = empty($_SERVER['HTTP_REFERER']) ? '' : $_SERVER['HTTP_REFERER']; // リファラURL
+		
+		// 現在URLを組み立てる
+		$now_url = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
 
 		$crudBaseData['pages'] = $pages; // ページネーション情報
 		$crudBaseData['data_count'] = $data_count; // 検索データ数
 		$crudBaseData['kjs_json'] = $kjs_json; // 検索条件ＪＳＯＮ
-		$crudBaseData['base_url'] = $base_url; // 基本ＵＲＬ
-		$crudBaseData['home_url'] = $home_url; // ホームＵＲＬ
+		$crudBaseData['base_url'] = $base_url; // 基本URL
+		$crudBaseData['referer_url'] = $referer_url; // リファラURL
+		$crudBaseData['now_url'] = $now_url; // 現在URL
 		$crudBaseData['row_exc_flg'] = $row_exc_flg; // 行入替機能フラグ  0:行入替ボタンは非表示 , 1:表示
 		
 
@@ -472,25 +475,6 @@ class CrudBaseController extends AppController {
 		return $crudBaseData;
 	}
 
-	
-	/**
-	 * ホームＵＲＬを作成する
-	 * @param array $crudBaseData
-	 * @param array $pages ページネーション情報
-	 * @param string $base_url 基本ＵＲＬ
-	 * @return string ホームＵＲＬ
-	 */
-	private function makeHomeUrl(&$crudBaseData,&$pages,$base_url){
-
-		// 初期条件データを取得する
-		$iniCnds = $this->getIniCnds($crudBaseData,$pages);
-
-		//　‎初期条件データからURLを作成
-		$home_url = $this->makeHomeUrlByIniCnds($iniCnds,$base_url);
-
-		return $home_url;
-
-	}
 	
 	/**
 	 * 初期条件データを取得する
@@ -528,44 +512,7 @@ class CrudBaseController extends AppController {
 		return $iniCnds;
 	}
 	
-	/**
-	 * 初期条件データからホームURLを作成
-	 * @param array $iniCnds 初期条件データ
-	 * @param string $base_url 基本ＵＲＬ
-	 * @return string ホームURL
-	*/
-	private function makeHomeUrlByIniCnds($iniCnds,$base_url){
-		
-		$query_str = "";
-		$pages = $iniCnds['pages'];
-		$kjs = $iniCnds['kjs'];
-		
-		$list = array('page_no','sort_field','sort_desc');
-		foreach($list as $field){
-			$value = $iniCnds['pages'][$field];
-			if(!empty($value) || $value === 0){
-				$value = urlencode($value);// URLエンコード
-				$query_str .= "&{$field}={$value}";
-			}
-		}
-		
-		foreach($iniCnds['kjs'] as $field => $value){
-			if(!empty($value) || $value===0){
-				$value = urlencode($value);
-				$query_str .= "&{$field}={$value}";
-			}
-		}
-		
-		$home_url = $base_url;
-		if(!empty($query_str)){
-			$query_str = mb_substr($query_str,1); // 先頭の一文字を削る(&を削る）
-			$home_url = $home_url . '?' . $query_str;
-		}
-		
-		return $home_url;
-		
-	}
-	
+
 	
 	/**
 	 * 行入替機能フラグを取得する

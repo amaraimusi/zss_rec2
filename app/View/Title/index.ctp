@@ -31,12 +31,12 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	
 	<div class="cb_kj_main">
 		<!-- 検索条件入力フォーム -->
-		<?php echo $this->Form->create('Title', array('url' => true )); ?>
+		<?php echo $this->Form->create('Title', array('url' => true  , 'class' => 'form_kjs')); ?>
 		<?php $this->CrudBase->inputKjMain($kjs,'kj_main','',null,'タイトル名前、タイトル日、備考を検索する');?>
-		<?php echo $this->Form->submit('検索', array('name' => 'search','class'=>'btn btn-success','div'=>false,));?>
+		<input type='button' value='検索' onclick='searchKjs()' class='search_kjs_btn btn btn-success' />
 		
 		<div class="btn-group">
-			<a href="<?php echo $home_url; ?>" class="btn btn-info btn-xs" title="この画面を最初に表示したときの状態に戻します。（検索状態、列並べの状態を初期状態に戻します。）">
+			<a href="" class="ini_rtn btn btn-info btn-xs" title="この画面を最初に表示したときの状態に戻します。（検索状態、列並べの状態を初期状態に戻します。）">
 				<span class="glyphicon glyphicon-certificate"  ></span></a>
 			<button type="button" class="btn btn-default btn-xs" title="詳細検索項目を表示する" onclick="jQuery('.cb_kj_detail').toggle(300)">詳細</button>
 		</div>
@@ -60,7 +60,7 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 		// --- CBBXE
 		
 		$this->CrudBase->inputKjLimit($kjs);
-		echo $this->Form->submit('検索', array('name' => 'search','class'=>'btn btn-success','div'=>false,));
+		echo "<input type='button' value='検索' onclick='searchKjs()' class='search_kjs_btn btn btn-success' />";
 		echo $this->element('CrudBase/crud_base_cmn_inp');
 		
 
