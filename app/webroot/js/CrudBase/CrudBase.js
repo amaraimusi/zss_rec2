@@ -12,8 +12,8 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2018-11-28
- * @version 2.6.6
+ * @date 2016-9-21 | 2018-12-18
+ * @version 2.6.8
  * @histroy
  * 2018-10-21 v2.6.6 検索をGETクエリ方式にする
  * 2018-10-21 v2.6.0 フォームをアコーディオン形式にする。
@@ -107,6 +107,12 @@ class CrudBase{
 		// ボタンサイズ変更コンポーネント
 		this.cbBtnSizeChanger = this._factoryCbBtnSizeChanger();
 		
+		// カレンダービュー
+		this.calendarViewK = this._factoryCalendarViewK();
+		
+		// CrudBase用リアクティブ機能
+		this.crudBaseReact = this._factoryCrudBaseReact();
+		
 		this.fueIdCash; // file要素のid属性データ（キャッシュ）
 		
 		// テーブル変形
@@ -133,6 +139,155 @@ class CrudBase{
 		// 検索関連の入力要素にEnterイベントを組み込む
 		this._addEventForKjsEnter();
 		
+	}
+
+
+	/**
+	 * パラメータに空プロパティがあれば、デフォルト値をセットする
+	 * @param object param パラメータ
+	 */
+	_setParamIfEmpty(param){
+
+		if(param == null){
+			param = {};
+		}
+
+		// 画面コード（スネーク記法）
+		if(param['src_code'] == null){
+			throw new Exception("'src_code' is empty!")
+		}
+
+		// 画面コード （キャメル）
+		if(param['src_code_c'] == null){
+			param['src_code_c'] = this._snakeToCamel(param.src_code);
+		}
+		
+		// CRUD対象テーブルセレクタ
+		if(param['tbl_slt'] == null){
+			param['tbl_slt'] = param.src_code + '_tbl';
+		}
+
+		// 編集フォームセレクタ
+		if(param['edit_form_slt'] == null){
+			param['edit_form_slt'] = 'ajax_crud_edit_form';
+		}
+
+		// 新規フォームセレクタ
+		if(param['new_form_slt'] == null){
+			param['new_form_slt'] = 'ajax_crud_new_inp_form';
+		}
+
+		// 削除フォームセレクタ
+		if(param['delete_form_slt'] == null){
+			param['delete_form_slt'] = 'ajax_crud_delete_form';
+		}
+
+		// 抹消フォームセレクタ
+		if(param['eliminate_form_slt'] == null){
+			param['eliminate_form_slt'] = 'ajax_crud_eliminate_form';
+		}
+
+		// コンテンツセレクタ
+		if(param['contents_slt'] == null){
+			param['contents_slt'] = null;
+		}
+
+		// 編集登録サーバーURL
+		if(param['edit_reg_url'] == null){
+			param['edit_reg_url'] = param.src_code + '/ajax_reg';
+		}
+
+		// 新規登録サーバーURL
+		if(param['new_reg_url'] == null){
+			param['new_reg_url'] = param.src_code + '/ajax_reg';
+		}
+
+		// 削除登録サーバーURL
+		if(param['delete_reg_url'] == null){
+			param['delete_reg_url'] = param.src_code + '/ajax_delete';
+		}
+
+		// 自動保存サーバーURL
+		if(param['auto_save_url'] == null){
+			param['auto_save_url'] = param.src_code + '/auto_save';
+		}
+
+		// ファイルアップロードデータ
+		if(param['file_uploads'] == null){
+			param['file_uploads'] = null;
+		}
+
+		// フォーム横幅
+		if(param['form_width'] == null){
+			param['form_width'] = null; // nullはフォーム幅がauto
+		}
+
+		// フォーム縦幅
+		if(param['form_height'] == null){
+			param['form_height'] = null; // nullはフォーム幅がauto
+		}
+
+		// フォーム位置
+		if(param['form_position'] == null){
+			param['form_position'] = 'auto';
+		}
+
+
+		// フォームの前面深度(z-index)
+		if(param['form_z_index'] == null){
+			param['form_z_index'] = 9;
+		}
+
+		// バリデーションメッセージセレクタ
+		if(param['valid_msg_slt'] == null){
+			param['valid_msg_slt'] = '.err';
+		}
+
+		// 自動閉フラグ
+		if(param['auto_close_flg'] == null){
+			param['auto_close_flg'] = 0;
+		}
+
+		// 新規入力追加場所フラグ
+		if(param['ni_tr_place'] == null){
+			param['ni_tr_place'] = 0;
+		}
+
+		// 表示フィルターデータ
+		if(param['disFilData'] == null){
+			param['disFilData'] = null;
+		}
+
+		// 検索条件情報
+		if(param['kjs'] == null){
+			param['kjs'] = null;
+		}
+
+		// デバイスタイプ
+		if(param['device_type'] == null){
+			param['device_type'] = this.judgDeviceType(); // デバイスタイプ（PC/SP）の判定
+		}
+
+		// 経由パスマッピング
+		if(param['viaDpFnMap'] == null){
+			var via_dp_fn_json = jQuery('#via_dp_fn_json').val();
+			param['viaDpFnMap'] = jQuery.parseJSON(via_dp_fn_json);
+		}
+
+		// エラータイプリスト
+		if(param['errTypes'] == null){
+			var err_types_json = jQuery('#err_types_json').val();
+			param['errTypes'] = jQuery.parseJSON(err_types_json);
+		}
+		
+		
+		if(param['drag_and_resize_flg'] == null) param['drag_and_resize_flg'] = 1;
+		
+		// フォームモード
+		if(param['form_mode'] == null) param['form_mode'] = 1
+		
+		
+		return param;
 	}
 	
 	
@@ -337,6 +492,57 @@ class CrudBase{
 		
 	}
 	
+	
+	/**
+	 * カレンダービューのファクトリーメソッド
+	 * @return CalendarViewK カレンダービュー
+	 */
+	_factoryCalendarViewK(){
+		var calendarViewK;
+		
+		// クラス（JSファイル）がインポートされていない場合、「空」の実装をする。
+		var t = typeof CalendarViewK;
+		if(t == null || t == 'undefined'){
+			// 「空」実装
+			calendarViewK = {
+					'create':function(){},
+			}
+			return calendarViewK
+		}
+		
+		// 自動保存機能の初期化
+		calendarViewK = new CalendarViewK();
+		
+		return calendarViewK;
+		
+	}
+	
+	
+	/**
+	 * CrudBase用リアクティブ機能のファクトリーメソッド
+	 * @return CrudBaseReact CrudBase用リアクティブ機能
+	 */
+	_factoryCrudBaseReact(){
+		var crudBaseReact;
+		
+		// クラス（JSファイル）がインポートされていない場合、「空」の実装をする。
+		var t = typeof CrudBaseReact;
+		if(t == null || t == 'undefined'){
+			// 「空」実装
+			crudBaseReact = {
+					'init':function(){},
+					'reactivatingOfRow':function(){},
+			}
+			return crudBaseReact
+		}
+		
+		// 自動保存機能の初期化
+		crudBaseReact = new CrudBaseReact();
+		
+		return crudBaseReact;
+		
+	}
+	
 	/**
 	 * 新規入力フォームからfile要素のid属性
 	 * @param string form_type フォーム種別
@@ -384,10 +590,21 @@ class CrudBase{
 
 	/**
 	 * 新規入力フォームを表示
-	 * @param option オプション（現バージョンでは未使用）
+	 * @param option オプション
+	 * - ni_tr_place 新規行の追加場所 add_to_top:一覧の上に新規行を追加 , add_to_bottom:一覧の下に新規行を追加
 	 * @param callBack フォームに一覧の行データを自動セットしたあとに呼び出されるコールバック関数(省略可）
 	 */
 	newInpShow(elm,option,callBack){
+		
+		if(option == null) option = {};
+		
+		// 新規行を上に追加するか、下に追加するかを決定する。
+		if(option['ni_tr_place'] == 'add_to_top'){
+			this.param.ni_tr_place = 1;
+		}else if(option['ni_tr_place'] == 'add_to_bottom'){
+			this.param.ni_tr_place = 0;
+		}
+		
 		var info = this.formInfo['new_inp'];
 
 		info.show_flg=1; // 表示制御フラグを表示中にする
@@ -411,11 +628,43 @@ class CrudBase{
 
 		if(this.param.form_mode == 1){
 			
-			// 表示とついでにtrとtd要素をblockにする。
-			form.css('display','block');
-			form.find('td').css('display','block');
-			form.insertAfter('#new_inp_form_point');
+			// フォームのcolspan属性に列数をセットする。
+			form = this._setColspanToForm(form);
 			
+
+			// tdのcolspan属性に表示中の列数をセットする
+			var td = form.find('td');
+			
+			// ▼ SPモードの場合はblock, PCモードの場合はtable系にする。
+			if(this.param.device_type == 'sp'){
+				td.attr('colspan', 1);
+				td.css('display','block');
+				form.css('display','block');
+			}else{
+				// 現在表示中の列数を取得する
+				var clm_cnt = this._getClmCntByActive();
+				td.attr('colspan', clm_cnt);
+				td.css('display','table-cell');
+				form.css('display','table-row');
+			}
+			
+			// ▼ フォームの位置を指定場所に移動する
+			if(option['ni_tr_place'] == 'add_to_top'){
+				var firstTr = this.tbl.find('tbody tr').eq(0); // 一覧テーブルから先頭行を取得する
+				form.insertBefore(firstTr); // 先頭行の上にフォームを表示する
+				
+			}else if(option['ni_tr_place'] == 'add_to_bottom'){
+				var endTr = this.tbl.find('tbody tr').eq(-1); // 一覧テーブルから末尾行を取得する
+				form.insertAfter(endTr); // 末尾行の下にフォームを表示する
+			
+			}else{			
+				// 表示とついでにtrとtd要素をblockにする。
+				td.css('display','block');
+				form.css('display','block');
+				form.insertAfter('#new_inp_form_point');
+				
+			}
+
 		}else{
 			// triggerElm要素の下付近に入力フォームを表示する。
 			this._showForm(form,elm,option);
@@ -754,6 +1003,8 @@ class CrudBase{
 				if(id_flg==true){
 					location.reload(true);
 				}
+				
+				this.closeForm('new_inp');// フォームを閉じる
 
 				// 新しい行を作成する
 				var tr = this._addTr(ent,add_row_index);
@@ -768,7 +1019,6 @@ class CrudBase{
 						}, 1);
 				}
 
-				this.closeForm('new_inp');// フォームを閉じる
 
 			}
 
@@ -970,6 +1220,8 @@ class CrudBase{
 
 		// フォームのオブジェクトを取得する
 		var form = fi.form;
+		
+		jQuery('#crud_base_forms').append(form);
 
 		// フォームを隠す
 		form.hide();
@@ -2198,152 +2450,6 @@ class CrudBase{
 
 		form.hide();//フォームを隠す
 
-	}
-
-
-	// パラメータに空プロパティがあれば、デフォルト値をセットする
-	_setParamIfEmpty(param){
-
-		if(param == null){
-			param = {};
-		}
-
-		// 画面コード（スネーク記法）
-		if(param['src_code'] == null){
-			throw new Exception("'src_code' is empty!")
-		}
-
-		// 画面コード （キャメル）
-		if(param['src_code_c'] == null){
-			param['src_code_c'] = this._snakeToCamel(param.src_code);
-		}
-		
-		// CRUD対象テーブルセレクタ
-		if(param['tbl_slt'] == null){
-			param['tbl_slt'] = param.src_code + '_tbl';
-		}
-
-		// 編集フォームセレクタ
-		if(param['edit_form_slt'] == null){
-			param['edit_form_slt'] = 'ajax_crud_edit_form';
-		}
-
-		// 新規フォームセレクタ
-		if(param['new_form_slt'] == null){
-			param['new_form_slt'] = 'ajax_crud_new_inp_form';
-		}
-
-		// 削除フォームセレクタ
-		if(param['delete_form_slt'] == null){
-			param['delete_form_slt'] = 'ajax_crud_delete_form';
-		}
-
-		// 抹消フォームセレクタ
-		if(param['eliminate_form_slt'] == null){
-			param['eliminate_form_slt'] = 'ajax_crud_eliminate_form';
-		}
-
-		// コンテンツセレクタ
-		if(param['contents_slt'] == null){
-			param['contents_slt'] = null;
-		}
-
-		// 編集登録サーバーURL
-		if(param['edit_reg_url'] == null){
-			param['edit_reg_url'] = param.src_code + '/ajax_reg';
-		}
-
-		// 新規登録サーバーURL
-		if(param['new_reg_url'] == null){
-			param['new_reg_url'] = param.src_code + '/ajax_reg';
-		}
-
-		// 削除登録サーバーURL
-		if(param['delete_reg_url'] == null){
-			param['delete_reg_url'] = param.src_code + '/ajax_delete';
-		}
-
-		// 自動保存サーバーURL
-		if(param['auto_save_url'] == null){
-			param['auto_save_url'] = param.src_code + '/auto_save';
-		}
-
-		// ファイルアップロードデータ
-		if(param['file_uploads'] == null){
-			param['file_uploads'] = null;
-		}
-
-		// フォーム横幅
-		if(param['form_width'] == null){
-			param['form_width'] = null; // nullはフォーム幅がauto
-		}
-
-		// フォーム縦幅
-		if(param['form_height'] == null){
-			param['form_height'] = null; // nullはフォーム幅がauto
-		}
-
-		// フォーム位置
-		if(param['form_position'] == null){
-			param['form_position'] = 'auto';
-		}
-
-
-		// フォームの前面深度(z-index)
-		if(param['form_z_index'] == null){
-			param['form_z_index'] = 9;
-		}
-
-		// バリデーションメッセージセレクタ
-		if(param['valid_msg_slt'] == null){
-			param['valid_msg_slt'] = '.err';
-		}
-
-		// 自動閉フラグ
-		if(param['auto_close_flg'] == null){
-			param['auto_close_flg'] = 0;
-		}
-
-		// 新規入力追加場所フラグ
-		if(param['ni_tr_place'] == null){
-			param['ni_tr_place'] = 0;
-		}
-
-		// 表示フィルターデータ
-		if(param['disFilData'] == null){
-			param['disFilData'] = null;
-		}
-
-		// 検索条件情報
-		if(param['kjs'] == null){
-			param['kjs'] = null;
-		}
-
-		// デバイスタイプ
-		if(param['device_type'] == null){
-			param['device_type'] = this.judgDeviceType(); // デバイスタイプ（PC/SP）の判定
-		}
-
-		// 経由パスマッピング
-		if(param['viaDpFnMap'] == null){
-			var via_dp_fn_json = jQuery('#via_dp_fn_json').val();
-			param['viaDpFnMap'] = jQuery.parseJSON(via_dp_fn_json);
-		}
-
-		// エラータイプリスト
-		if(param['errTypes'] == null){
-			var err_types_json = jQuery('#err_types_json').val();
-			param['errTypes'] = jQuery.parseJSON(err_types_json);
-		}
-		
-		
-		if(param['drag_and_resize_flg'] == null) param['drag_and_resize_flg'] = 1;
-		
-		// フォームモード
-		if(param['form_mode'] == null) param['form_mode'] = 1
-		
-		
-		return param;
 	}
 	
 	
@@ -4091,7 +4197,73 @@ class CrudBase{
 		}
 		return this.formKjsElm;
 	}
+	
+	
+	
+	/**
+	 * カレンダービューを生成
+	 * @param string date_field 日付フィールド
+	 */
+	calendarViewCreate(date_field){
 
+		// 一覧テーブルからデータを取得する
+		var data = this.getDataFromTbl();
+		
+		// カレンダービューを生成
+		this.calendarViewK.create(data, date_field);
+		
+	}
+	
+	/**
+	 * リアクト機能の初期化
+	 * @param string hyo_elm_id 表要素ID   複数の表IDを指定するときはコンマで連結する
+	 */
+	reactInit(hyo_elm_id){		
+		// ■■■□□□■■■□□□■■■□□□
+		var d1 = new Date();
+		var t1 = d1.getTime();
+		
+
+//		console.log('this.fieldData');//■■■□□□■■■□□□■■■□□□)
+//		console.log(this.fieldData);//■■■□□□■■■□□□■■■□□□)
+//		
+		// フィールド配列を取得する
+		var fields = this._getFields();
+		
+		this.crudBaseReact.init(fields, hyo_elm_id);
+		
+		// ■■■□□□■■■□□□■■■□□□
+		var d2 = new Date();
+		var t2 = d1.getTime();
+		var t3 = t2 - t1;
+		console.log('タイム：' + t3);//■■■□□□■■■□□□■■■□□□)
+	}
+	
+	/**
+	 * 行のリアクティビング
+	 */
+	reactivatingOfRow(){
+		this.crudBaseReact.reactivatingOfRow();
+	}
+
+	/**
+	 * フィールド配列を取得する
+	 * @return array フィールド配列
+	 */
+	_getFields(){
+		
+		if(this.fields != null) return this.fields;
+		
+		var fields = [];
+		for(var i in this.fieldData){
+			var fEnt = this.fieldData[i];
+			fields.push(fEnt.field);
+		}
+		this.fields = fields;
+		return this.fields;
+
+	}
+	
 }
 
 

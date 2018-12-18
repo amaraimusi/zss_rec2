@@ -106,9 +106,10 @@ function init(){
  * 新規入力フォームを表示
  * @param btnElm ボタン要素
  */
-function newInpShow(btnElm){
+function newInpShow(btnElm, ni_tr_place){
 	
-	crudBase.newInpShow(btnElm,null,(param) =>{
+	var option = {'ni_tr_place':ni_tr_place};
+	crudBase.newInpShow(btnElm, option, (param) =>{
 		// フォームに一覧の行データを自動セットしたあとに呼び出されるコールバック関数
 		
 		// 本日を取得

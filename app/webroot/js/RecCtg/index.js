@@ -97,8 +97,8 @@ function init(){
  * 新規入力フォームを表示
  * @param btnElm ボタン要素
  */
-function newInpShow(btnElm){
-	crudBase.newInpShow(btnElm);
+function newInpShow(btnElm, ni_tr_place){
+	crudBase.newInpShow(btnElm, {'ni_tr_place':ni_tr_place});
 }
 
 /**
