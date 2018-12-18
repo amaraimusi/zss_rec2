@@ -9,8 +9,8 @@ App::uses('CbFileUploadHComp', 'View/Helper/Component');
  * 検索条件入力フォームや、一覧テーブルのプロパティのラッパーを提供する
  * 
  * 
- * @version 1.6.8
- * @date 2016-7-27 | 2018-11-28
+ * @version 1.6.9
+ * @date 2016-7-27 | 2018-12-18
  * @author k-uehara
  *
  */
@@ -195,7 +195,7 @@ class CrudBaseHelper extends FormHelper {
 		echo $this->input($this->_mdl.$field, array(
 				'id' => $field,
 				'value' => $kjs[$field],
-				'type' => 'text',
+				'type' => 'search',
 				'label' => false,
 				'placeholder' => $wamei,
 				'style'=>"width:{$width}px",
