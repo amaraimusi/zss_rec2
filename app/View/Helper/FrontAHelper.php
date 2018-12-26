@@ -4,8 +4,8 @@ App::uses('FormHelper', 'View/Helper');
 /**
  * フロントAページ用ヘルパー
  * 
- * @version 1.0.1
- * @date 2018-10-8
+ * @version 1.0.2
+ * @date 2018-10-8 | 2018-12-27
  * @author k-uehara
  *
  */
@@ -23,8 +23,9 @@ class FrontAHelper extends Helper {
 	 * @return string トップ・ページリンクボタンHTML
 	 */
 	public function topLinkBtn(&$pages){
-		$url = $pages['page_top_link'];
+		if($pages['all_page_cnt'] <= 1) return '';
 		
+		$url = $pages['page_top_link'];
 		$disabled = '';
 		if(empty($url)) $disabled = 'disabled';
 		
@@ -37,8 +38,10 @@ class FrontAHelper extends Helper {
 	 * @return string 前へ・ページリンクボタンHTML
 	 */
 	public function prevLinkBtn(&$pages){
-		$url = $pages['page_prev_link'];
 		
+		if($pages['all_page_cnt'] <= 1) return '';
+		
+		$url = $pages['page_prev_link'];
 		$disabled = '';
 		if(empty($url)) $disabled = 'disabled';
 		
@@ -51,8 +54,10 @@ class FrontAHelper extends Helper {
 	 * @return string 次へ・ページリンクボタンHTML
 	 */
 	public function nextLinkBtn(&$pages){
-		$url = $pages['page_next_link'];
 		
+		if($pages['all_page_cnt'] <= 1) return '';
+		
+		$url = $pages['page_next_link'];
 		$disabled = '';
 		if(empty($url)) $disabled = 'disabled';
 		
