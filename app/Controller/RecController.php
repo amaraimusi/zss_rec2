@@ -136,13 +136,16 @@ class RecController extends CrudBaseController {
 		$data = $this->Rec->findDataForFrontA($crudBaseData);
 		
 
-		// サブ画像集約
-		$data = $this->Rec->aggSubImg($data,array(
-				'note_field' => 'note',
-				'img_fn_field' => 'img_fn' ,
-				'img_via_dp_field' => $this->viaDpFnMap['img_fn'],
-				'dp_tmpl' => $this->dp_tmpl,
-		));
+		// ▼ サブ画像集約ライブラリ
+		App::uses('SubImgAgg', 'Vendor/Wacg');
+		$subImgAgg = new SubImgAgg();
+		$data = $subImgAgg->agg($data,array(
+				'note_field' => 'note',			// ノートフィールド名
+				'img_fn_field' => 'img_fn' ,	// 画像フィールド名
+				'img_via_dp_field' => $this->viaDpFnMap['img_fn'], // 画像経由パスフィールド名
+				'dp_tmpl' => $this->dp_tmpl));	// ディレクトリパス・テンプレート
+		
+		
 		
 		// CrudBase共通処理（後）
 		$crudBaseData = $this->indexAfter($crudBaseData,['method_url'=>'front_a']);//indexアクションの共通後処理
