@@ -80,11 +80,11 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 		<?php echo $this->Form->end()?>
 	</div>
 	
-	<div id="cb_func_btns" class="btn-group" >
 		<button type="button" onclick="$('#detail_div').toggle(300);" class="btn btn-default">
 			<span class="glyphicon glyphicon-wrench"></span></button>
-	</div>
-		
+		<a href="title" class="btn btn-info btn-xs">主題編集</a>
+		<a href="title_ctg" class="btn btn-info btn-xs">カテゴリ編集</a>
+
 </div><!-- cb_func_line -->
 
 <div style="clear:both"></div>

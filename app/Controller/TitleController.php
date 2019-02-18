@@ -210,10 +210,6 @@ class TitleController extends CrudBaseController {
 		$ent = $this->Title->saveEntity($ent,$regParam);
 		$this->Title->commit();//コミット
 
-		// ファイルアップロードの一括作業
-		App::uses('FileUploadK','Vendor/CrudBase/FileUploadK');
-		$fileUploadK = new FileUploadK();
-		$res = $fileUploadK->putFile1($_FILES, 'img_fn', $ent['img_fn']);
 		
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
 		
