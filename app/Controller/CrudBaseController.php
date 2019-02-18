@@ -11,7 +11,7 @@ App::uses('AppController', 'Controller');
 class CrudBaseController extends AppController {
 
 	///バージョン
-	var $version = "2.5.5";
+	var $version = "2.7.4";
 
 	///デフォルトの並び替え対象フィールド
 	var $defSortFeild='sort_no';
@@ -51,15 +51,6 @@ class CrudBaseController extends AppController {
 	// バージョン情報
 	public $verInfo = array();
 	
-	/// リソース保存先・ディレクトリパス・テンプレート
-	public $dp_tmpl = 'rsc/img/%field/%via_dp/%dn/';
-	
-	/// 経由パスマッピング
-	public $viaDpFnMap = array();
-	
-	public $components = ['CbFileUpload']; // ファイルアップロードコンポーネント [CakePHPの機能]
-	
-
 	// -- ▽ 内部処理用
 	private $m_kj_keys;//検索条件キーリスト
 	private $m_kj_defs;//検索条件デフォルト値
@@ -214,35 +205,32 @@ class CrudBaseController extends AppController {
 		}
 		
 		$sql_dump_flg = $option['sql_dump_flg']; // SQLダンプフラグ   true:SQLダンプを表示（デバッグモードである場合） , false:デバッグモードであってもSQLダンプを表示しない。
-		
-		// 経由パスマッピングJSON
-		$via_dp_fn_json = json_encode($this->viaDpFnMap,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
-		
+
 		// エラータイプJSON
 		$err_types_json = json_encode($errTypes,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
-		
+
 		$crudBaseData = array(
-				'field_data'=>$active, // アクティブフィールドデータ
-				'kjs'=>$kjs, // 検索条件情報
-				'kjs_json'=>$kjs_json, // 検索条件JSON
+				'model_name_c'=> $this->main_model_name, // モデル名（キャメル記法）
+				'model_name_s'=> $this->main_model_name_s, // モデル名（スネーク記法）
+				'field_data'=>$active, 		// アクティブフィールドデータ
+				'kjs'=>$kjs, 				// 検索条件情報
+				'kjs_json'=>$kjs_json, 		// 検索条件JSON
 				'def_kjs_json'=>$def_kjs_json, // デフォルト検索情報JSON
-				'errMsg'=>$errMsg, // エラーメッセージ
-				'errTypes' => $errTypes, // エラータイプ
+				'errMsg'=>$errMsg, 			// エラーメッセージ
+				'errTypes' => $errTypes, 	// エラータイプ
 				'err_types_json' => $err_types_json, // エラータイプJSON
-				'version'=>$this->version, // CrudBaseのバージョン
-				'userInfo'=>$userInfo, // ユーザー情報
+				'version'=>$this->version, 	// CrudBaseのバージョン
+				'userInfo'=>$userInfo, 		// ユーザー情報
 				'new_version_chg'=>$new_version_chg, // 新バージョン変更フラグ: 0:通常  ,  1:新バージョンに変更
-				'debug_mode'=>$debug_mode, // デバッグモード	CakePHPのデバッグモードと同じもの
-				'csh_ary'=>$csh_ary, // 列表示配列	列表示切替機能用
-				'csh_json'=>$csh_json, // 列表示配列JSON	 列表示切替機能用
-				'bigDataFlg'=>$bigDataFlg, // 巨大データフラグ	画面に表示する行数が制限数（$big_data_limit）を超えるとONになる。
+				'debug_mode'=>$debug_mode, 	// デバッグモード	CakePHPのデバッグモードと同じもの
+				'csh_ary'=>$csh_ary, 		// 列表示配列	列表示切替機能用
+				'csh_json'=>$csh_json, 		// 列表示配列JSON	 列表示切替機能用
+				'bigDataFlg'=>$bigDataFlg, 	// 巨大データフラグ	画面に表示する行数が制限数（$big_data_limit）を超えるとONになる。
 				'big_data_fields'=>$big_data_fields, // 巨大データ用のフィールド情報 (高速化のため列の種類は少なめ）
-				'pages'=>$pages, // ページネーションパラメータ
-				'act_flg'=>$act_flg, // アクティブフラグ	null:初期表示 , 1:検索アクション , 2:ページネーションアクション , 3:列ソートアクション
+				'pages'=>$pages, 			// ページネーションパラメータ
+				'act_flg'=>$act_flg, 		// アクティブフラグ	null:初期表示 , 1:検索アクション , 2:ページネーションアクション , 3:列ソートアクション
 				'sql_dump_flg'=>$sql_dump_flg, // SQLダンプフラグ
-				'dp_tmpl' => $this->dp_tmpl, // リソース保存先・ディレクトリパス・テンプレート
-				'viaDpFnMap' => $this->viaDpFnMap , // 経由パスマッピング
-				'via_dp_fn_json' => $via_dp_fn_json, // 経由パスマッピングJSON
+
 		);
 		
 		
@@ -596,6 +584,33 @@ class CrudBaseController extends AppController {
 
 		return $userInfo;
 	}
+	
+	/**
+	 * 許可権限リストを作成(扱える下位権限のリスト）
+	 * @return array 許可権限リスト
+	 */
+	protected function makePermRoles(){
+		
+		$userInfo = $this->getUserInfo(); // 現在のログインユーザー情報を取得する
+		$authData = $this->getAuthorityData();// 権限データを取得する
+		
+		// 許可権限リストを権限データをフィルタリングして取得する
+		$permRoles = array(); // 許可権限リスト
+		$role = $userInfo['authority']['name']; // 権限名
+		if($role == 'master'){
+			$permRoles = array_keys($authData);
+		}else{
+			$level = $userInfo['authority']['level']; // 権限レベル
+			foreach($authData as $aEnt){
+				if($aEnt['level'] < $level){
+					$permRoles[] = $aEnt['name'];
+				}
+			}
+		}
+		
+		return $permRoles;
+		
+	}
 
 	/**
 	 * 権限に紐づく権限エンティティを取得する
@@ -621,7 +636,7 @@ class CrudBaseController extends AppController {
 	 */
 	protected function getRoleList(){
 		
-		$role = $this->userInfo['authority']['name'];
+		$role = $this->userInfo['authority']['name']; // 現在の権限を取得
 		$data = $this->getAuthorityData();
 		$roleList = array(); // 権限リスト
 		if($role == 'master'){
@@ -630,7 +645,7 @@ class CrudBaseController extends AppController {
 			$level = $this->userInfo['authority']['level'];
 			foreach($data as $ent){
 				if($level > $ent['level']){
-					$name = $ent['level'];
+					$name = $ent['name'];
 					$wamei = $ent['wamei'];
 					$roleList[$name] = $wamei;
 				}
@@ -786,7 +801,7 @@ class CrudBaseController extends AppController {
 
 		//リロードチェック
 		if(empty($this->ReloadCheck)){
-			App::uses('ReloadCheck','Vendor/Wacg');
+			App::uses('ReloadCheck','Vendor/CrudBase');
 			$this->ReloadCheck=new ReloadCheck();
 		}
 
@@ -1437,7 +1452,7 @@ class CrudBaseController extends AppController {
 	protected function copyEx($sourceFn,$copyFn,$permission=0777){
 
 		if(empty($this->CopyEx)){
-			App::uses('CopyEx', 'Vendor/Wacg');
+			App::uses('CopyEx', 'Vendor/CrudBase');
 			$this->CopyEx = $this->Animal=new CopyEx();
 		}
 
@@ -1473,7 +1488,7 @@ class CrudBaseController extends AppController {
 	protected function mkdir777($path,$sjisFlg=false){
 
 		if(empty($this->MkdirEx)){
-			App::uses('MkdirEx', 'Vendor/Wacg');
+			App::uses('MkdirEx', 'Vendor/CrudBase');
 			$this->MkdirEx = new MkdirEx();
 		}
 
@@ -1685,43 +1700,7 @@ class CrudBaseController extends AppController {
 
 		return 'success';
 	}
-
-
-	/**
-	 * エンティティ中のアップロード系フィールドのファイル名を変換する。
-	 * @param array $ent 更新データのエンティティ
-	 * @param array $FILES $_FILES
-	 * @param option
-	 *  - fu_field アップロード系フィールド
-	 *  - 	id_flg ファイル名にidを表示(デフォ:true)
-	 *  - 	fn_flg ファイル名に元ファイル名を表示(デフォ:true)
-	 *  - 	date_flg ファイル名に日付を表示(デフォ:false)
-	 *  - 	time_flg ファイル名に時刻を表示(デフォ:false)
-	 * @return array アップロードファイル名変換後のエンティティ
-	 */
-	protected function convUploadFileName(&$ent,&$FILES,$option = array()){
-		
-		return $this->CbFileUpload->convUploadFileName($ent,$FILES,$option);
-	}
 	
-	/**
-	 * ファイルアップロード関連の一括作業
-	 * @param string $form_type フォーム種別  new_inp,edit,eliminate
-	 * @param string $dp_tmpl リソース保存先・ディレクトリパス・テンプレート
-	 * @param array $viaDpFnMap 経由パスマッピング
-	 * @param array $ent 更新エンティティ
-	 * @param array $FILES $_FILES
-	 * @param array $option
-	 * - FileUploadK.phpのオプション設定
-	 *
-	 */
-	protected function workFileUploads($form_type,$dp_tmpl,$viaDpFnMap,&$ent,&$FILES,$option = array()){
-		
-		return $this->CbFileUpload->workAllAtOnce($form_type,$dp_tmpl,$viaDpFnMap,$ent,$FILES,$option);
-	}
-	
-	
-
 
 	/**
 	 * パラメータ内の指定したフィールドが数値であるかチェックする
@@ -1824,6 +1803,54 @@ class CrudBaseController extends AppController {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * テンプレートからファイルパスを組み立てる
+	 * @param array $FILES $_FILES
+	 * @param string $path_tmpl ファイルパステンプレート
+	 * @param array $ent エンティティ
+	 * @param string $field
+	 * @param string $date 
+	 * @return string ファイルパス
+	 */
+	protected function makeFilePath(&$FILES, $path_tmpl, $ent, $field, $date=null){
+		
+		// $_FILESにアップロードデータがなければ、既存ファイルパスを返す
+		if(empty($FILES[$field])){
+			return $ent[$field];
+		}
+
+		$fp = $path_tmpl;
+		
+		// ファイル名を置換
+		$fn = $FILES[$field]['name']; // ファイル名を取得
+		$fp = str_replace('%fn', $fn, $fp);
+		
+		// フィールドを置換
+		$fp = str_replace('%field', $field, $fp);
+
+		// 日付が空なら現在日時をセットする
+		if(empty($date)){
+			$date = date('Y-m-d H:i:s');
+		}
+		$u = strtotime($date);
+		$Y = date('Y',$u);
+		$m = date('m',$u);
+		$d = date('d',$u);
+		$H = date('H',$u);
+		$i = date('i',$u);
+		$s = date('s',$u);
+		
+		$fp = str_replace('%Y', $Y, $fp);
+		$fp = str_replace('%m', $m, $fp);
+		$fp = str_replace('%d', $d, $fp);
+		$fp = str_replace('%H', $H, $fp);
+		$fp = str_replace('%i', $i, $fp);
+		$fp = str_replace('%s', $s, $fp);
+		
+		return $fp;
+	
 	}
 	
 

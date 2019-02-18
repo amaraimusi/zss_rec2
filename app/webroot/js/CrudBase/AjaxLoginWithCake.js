@@ -4,8 +4,8 @@
  * @note
  * AjaxLoginWithCakeController.phpと連動
  * 
- * @date 2016-9-12 | 2018-7-3
- * @version 2.0 ES6対応
+ * @date 2016-9-12 | 2019-1-18
+ * @version 2.0.1 ES6対応 aクエリを廃止
  */
 
 class AjaxLoginWithCake{
@@ -66,10 +66,12 @@ class AjaxLoginWithCake{
 
 		var rGet = this._getUrlQuery();// GETパラメータを取得
 		
-		// aパラメータがONの場合に認証機能を有効にする。
-		if(this._isSet(rGet['a'])){
-			this.loginCheck(param);
-		}
+//		// aパラメータがONの場合に認証機能を有効にする。
+//		if(this._isSet(rGet['a'])){
+//			this.loginCheck(param);
+//		}
+		
+		this.loginCheck(param);
 
 	}
 	

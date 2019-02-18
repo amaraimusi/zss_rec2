@@ -162,8 +162,11 @@ class Title extends AppModel {
 		if(!empty($kjs['kj_note'])){
 			$cnds[]="Title.note LIKE '%{$kjs['kj_note']}%'";
 		}
-		if(!empty($kjs['kj_public_flg'])){
-			$cnds[]="Title.public_flg = {$kjs['kj_public_flg']}";
+		$kj_public_flg = $kjs['kj_public_flg'];
+		if(!empty($kjs['kj_public_flg']) || $kjs['kj_public_flg'] ==='0' || $kjs['kj_public_flg'] ===0){
+			if($kjs['kj_public_flg'] != -1){
+				$cnds[]="Title.public_flg = {$kjs['kj_public_flg']}";
+			}
 		}
 		if(!empty($kjs['kj_sort_no']) || $kjs['kj_sort_no'] ==='0' || $kjs['kj_sort_no'] ===0){
 			$cnds[]="Title.sort_no = {$kjs['kj_sort_no']}";
@@ -269,7 +272,20 @@ class Title extends AppModel {
 		return $cnt;
 	}
 	
-
+	/**
+	 * アップロードファイルの抹消処理
+	 * 
+	 * @note
+	 * 他のレコードが保持しているファイルは抹消対象外
+	 * 
+	 * @param int $id
+	 * @param string $fn_field_strs ファイルフィールド群文字列（複数ある場合はコンマで連結）
+	 * @param array $ent エンティティ
+	 */
+	public function eliminateFiles($id, $fn_field_strs, &$ent){
+		$this->CrudBase->eliminateFiles($this, $id, $fn_field_strs, $ent);
+	}
+	
 	
 	// CBBXS-1021
 	/**

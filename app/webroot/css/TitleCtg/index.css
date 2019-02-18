@@ -8,3 +8,11 @@
 #title_ctg_tbl thead .note{
 	width:200px;
 }
+
+.form_detail_e{
+	display:none;
+}
+
+.form_detail_n{
+	display:none;
+}

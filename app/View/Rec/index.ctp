@@ -1,5 +1,5 @@
 <?php
-$this->CrudBase->init(array('model_name'=>'Rec'));
+echo $this->element('CrudBase/crud_base_helper_init');
 
 // CSSファイルのインクルード
 $cssList = $this->CrudBase->getCssList();
@@ -31,10 +31,10 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	
 	<div class="cb_kj_main">
 		<!-- 検索条件入力フォーム -->
-		<?php echo $this->Form->create('Rec', array('url' => true  , 'class' => 'form_kjs')); ?>
-		<?php $this->CrudBase->inputKjMain($kjs,'kj_main','',null,'記録日付、ノート、画像ファイル名、画像パス、参照URL、番号A,番号B、旧タイトルを検索する');?>
+		<?php echo $this->Form->create('Rec', array('url' => true , 'class' => 'form_kjs')); ?>
+		<?php $this->CrudBase->inputKjMain($kjs,'kj_main','',null,'記録,日付を検索');?>
+		<?php $this->CrudBase->inputKjSelect($kjs,'kj_title_id','タイトル',$titleIdList); ?>
 		<input type='button' value='検索' onclick='searchKjs()' class='search_kjs_btn btn btn-success' />
-		
 		<div class="btn-group">
 			<a href="" class="ini_rtn btn btn-info btn-xs" title="この画面を最初に表示したときの状態に戻します。（検索状態、列並べの状態を初期状態に戻します。）">
 				<span class="glyphicon glyphicon-certificate"  ></span></a>
@@ -46,15 +46,15 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 		
 		// --- CBBXS-1004
 		$this->CrudBase->inputKjId($kjs);
-		$this->CrudBase->inputKjSelect($kjs,'kj_title_id','タイトル',$titleIdList); 
-		$this->CrudBase->inputKjText($kjs,'kj_rec_date','記録日付');
+		$this->CrudBase->inputKjMoDateRng($kjs,'kj_rec_date','記録日付');
 		$this->CrudBase->inputKjText($kjs,'kj_note','ノート');
 		$this->CrudBase->inputKjSelect($kjs,'kj_rec_ctg_id','記録カテゴリ',$recCtgIdList); 
 		$this->CrudBase->inputKjText($kjs,'kj_img_fn','画像');
+		$this->CrudBase->inputKjText($kjs,'kj_file_name','ファイル名');
 		$this->CrudBase->inputKjText($kjs,'kj_img_dp','画像ディレクトリパス');
 		$this->CrudBase->inputKjText($kjs,'kj_ref_url','参照URL');
-		$this->CrudBase->inputKjText($kjs,'kj_no_a','番号A');
-		$this->CrudBase->inputKjText($kjs,'kj_no_b','番号B');
+		$this->CrudBase->inputKjNumRange($kjs,'no_a','番号A');
+		$this->CrudBase->inputKjNumRange($kjs,'no_b','番号B');
 		$this->CrudBase->inputKjText($kjs,'kj_rec_title','rec_title');
 		$this->CrudBase->inputKjText($kjs,'kj_parent_id','親ID');
 		$this->CrudBase->inputKjFlg($kjs,'kj_public_flg','公開');
@@ -82,25 +82,15 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	
 	<div id="cb_func_btns" class="btn-group" >
 		<button type="button" onclick="$('#detail_div').toggle(300);" class="btn btn-default">
-			<span class="glyphicon glyphicon-cog"></span></button>
-
-		<button id="table_transform_tbl_mode" type="button" class="btn btn-default" onclick="tableTransform(0)" style="display:none">
-			<span class="glyphicon glyphicon-th" title="一覧の変形・テーブルモード"></span></button>
-			
-		<button id="table_transform_div_mode" type="button" class="btn btn-default" onclick="tableTransform(1)" >
-			<span class="glyphicon glyphicon-th-large" title="一覧の変形・区分モード"></span></button>
-			
-		<button type="button" class="btn btn-warning" onclick="newInpShow(this);">
-			<span class="glyphicon glyphicon-plus-sign" title="新規入力"></span></button>
-		
+			<span class="glyphicon glyphicon-wrench"></span></button>
 	</div>
 		
-	<a href="rec/front_a?<?php echo $pages['query_str']; ?>" class="btn btn-info btn-xs" target="brank" >フロント画面</a>
-	<a href="title" class="btn btn-info btn-xs" >タイトル画面</a>
 </div><!-- cb_func_line -->
 
 <div style="clear:both"></div>
 
+<!-- 一括追加機能  -->
+<div id="crud_base_bulk_add" style="display:none"></div>
 
 <?php echo $this->element('CrudBase/crud_base_new_page_version');?>
 <div id="err" class="text-danger"><?php echo $errMsg;?></div>
@@ -110,14 +100,37 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 
 <div id="detail_div" style="display:none">
 	
-<?php 
-	echo $this->element('CrudBase/crud_base_index');
-	
-	$csv_dl_url = $this->html->webroot . 'rec/csv_download';
-	$this->CrudBase->makeCsvBtns($csv_dl_url);
-?>
+	<div id="main_tools" style="margin-bottom:10px;">
+		<?php 
+			// 列表示切替機能
+			echo $this->element('CrudBase/clm_cbs'); 
+			
+			// CSVエクスポート機能
+			$csv_dl_url = $this->html->webroot . 'rec/csv_download';
+			$this->CrudBase->makeCsvBtns($csv_dl_url);
 
+		?>
+
+		<button id="crud_base_bulk_add_btn" type="button" class="btn btn-default btn-sm" onclick="crudBase.crudBaseBulkAdd.showForm()" >一括追加</button>
+		
+	</div><!-- main_tools -->
+	
+	<div id="sub_tools">
+		<input type="button" value="ボタンサイズ変更" class="btn btn-default btn-xs" onclick="jQuery('#CbBtnSizeChanger').toggle(300);" />
+		<div id="CbBtnSizeChanger" style="display:none"></div>
+		
+		<button id="calendar_view_k_btn" type="button" class="btn btn-default btn-xs" onclick="calendarViewKShow()" >
+			<span class="glyphicon glyphicon-time" >カレンダーモード</span></button>
+		
+		<button type="button" class="btn btn-default btn-xs" onclick="session_clear()" >セッションクリア</button>
+	
+		<button id="table_transform_tbl_mode" type="button" class="btn btn-default btn-xs" onclick="tableTransform(0)" style="display:none">一覧の変形・テーブルモード</button>	
+		<button id="table_transform_div_mode" type="button" class="btn btn-default btn-xs" onclick="tableTransform(1)" >一覧の変形・スマホモード</button>
+		
+		<a href="rec/front_a?<?php echo $pages['query_str']; ?>" class="btn btn-default btn-xs" target="brank" >フロント画面表示</a>
+	</div><!-- sub_tools -->
 </div><!-- detail_div -->
+
 
 <div id="new_inp_form_point"></div><!-- 新規入力フォーム表示地点 -->
 
@@ -129,13 +142,18 @@ $this->assign('script', $this->Html->script($jsList,array('charset'=>'utf-8')));
 	<div style="display:inline-block">件数:<?php echo $data_count ?></div>
 </div>
 
+<div id="calendar_view_k"></div>
+
+
 <div id="crud_base_auto_save_msg" style="height:20px;" class="text-success"></div>
 
-<button type="button" class="btn btn-warning btn-sm" onclick="newInpShow(this, 'add_to_top');">
-	<span class="glyphicon glyphicon-plus-sign" title="新規入力"> 追加</span></button>
+<?php if(!empty($data)){ ?>
+	<button type="button" class="btn btn-warning btn-sm" onclick="newInpShow(this, 'add_to_top');">
+		<span class="glyphicon glyphicon-plus-sign" title="新規入力"> 追加</span></button>
+<?php } ?>
 	
 <!-- 一覧テーブル -->
-<table id="rec_tbl" border="1"  class="table table-striped table-bordered table-condensed" style="display:none">
+<table id="rec_tbl" class="table table-striped table-bordered table-condensed" style="display:none;margin-bottom:0px">
 
 <thead>
 <tr>
@@ -156,14 +174,15 @@ $this->CrudBase->startClmSortMode($field_data);
 
 foreach($data as $i=>$ent){
 
-	echo "<tr id=i{$ent['id']}>";
+	echo "<tr id='ent{$ent['id']}' >";
 	// CBBXS-1005
 	$this->CrudBase->tdId($ent,'id',array('checkbox_name'=>'pwms'));
 	$this->CrudBase->tdList($ent,'title_id',$titleIdList);
 	$this->CrudBase->tdPlain($ent,'rec_date');
 	$this->CrudBase->tdNote($ent,'note');
 	$this->CrudBase->tdList($ent,'rec_ctg_id',$recCtgIdList);
-	$this->CrudBase->tdImage($ent,'img_fn');
+	$this->CrudBase->tdImage($ent,'img_fn', '/photos/halther/');
+	$this->CrudBase->tdStr($ent,'file_name');
 	$this->CrudBase->tdStr($ent,'img_dp');
 	$this->CrudBase->tdStr($ent,'ref_url');
 	$this->CrudBase->tdPlain($ent,'no_a');
@@ -183,7 +202,7 @@ foreach($data as $i=>$ent){
 	$this->CrudBase->tdsEchoForClmSort();// 列並に合わせてTD要素群を出力する
 	
 	// 行のボタン類
-	echo "<td><div class='btn-group' style='display:inline-block'>";
+	echo "<td><div style='display:inline-block'>";
 	$id = $ent['id'];
 	echo  "<input type='button' value='↑↓' onclick='rowExchangeShowForm(this)' class='row_exc_btn btn btn-info btn-xs' />";
 	$this->CrudBase->rowEditBtn($id);
@@ -212,7 +231,7 @@ foreach($data as $i=>$ent){
 <table id="crud_base_forms">
 
 	<!-- 新規入力フォーム -->
-	<tr id="ajax_crud_new_inp_form" class="crud_base_form" style="display:none;padding-bottom:60px"><td>
+	<tr id="ajax_crud_new_inp_form" class="crud_base_form" style="display:none;padding-bottom:60px"><td colspan='5'>
 	
 		<div>
 			<div style="color:#3174af;float:left">新規入力</div>
@@ -270,8 +289,15 @@ foreach($data as $i=>$ent){
 			<div class='cbf_inp_label_long' >画像: </div>
 			<div class='cbf_input'>
 				<label for="img_fn_n" class="fuk_label" style="width:100px;height:100px;">
-					<input type="file" id="img_fn_n" class="img_fn" style="display:none" accept="image/*" title="画像ファイルのアップロード" />
+					<input type="file" id="img_fn_n" class="img_fn" style="display:none" accept="image/*" title="画像ファイルをドラッグ＆ドロップ(複数可)"  data-inp-ex='image_fuk' data-fp='' />
 				</label>
+			</div>
+		</div>
+		<div class="cbf_inp_wrap">
+			<div class='cbf_inp' >ファイル名: </div>
+			<div class='cbf_input'>
+				<input type="text" name="file_name" class="valid " value=""  maxlength="512" title="512文字以内で入力してください" />
+				<label class="text-danger" for="file_name"></label>
 			</div>
 		</div>
 
@@ -294,14 +320,14 @@ foreach($data as $i=>$ent){
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp_label' >番号A: </div>
 			<div class='cbf_input'>
-				<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+				<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
 				<label class="text-danger" for="no_a" ></label>
 			</div>
 		</div>
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp_label' >番号B: </div>
 			<div class='cbf_input'>
-				<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+				<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
 				<label class="text-danger" for="no_b" ></label>
 			</div>
 		</div>
@@ -316,7 +342,7 @@ foreach($data as $i=>$ent){
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp_label' >親ID: </div>
 			<div class='cbf_input'>
-				<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?[0-9]$" maxlength="11" title="数値（整数数）を入力してください" />
+				<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
 				<label class="text-danger" for="parent_id" ></label>
 			</div>
 		</div>
@@ -397,14 +423,22 @@ foreach($data as $i=>$ent){
 			</div>
 		</div>
 
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label_long' >画像: </div>
+				<div class='cbf_input'>
+					<label for="img_fn_e" class="fuk_label" style="width:100px;height:100px;">
+						<input type="file" id="img_fn_e" class="img_fn" style="display:none" accept="image/*" title="画像ファイルをドラッグ＆ドロップ(複数可)" data-inp-ex='image_fuk' data-fp='' />
+					</label>
+				</div>
+			</div>
 		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label_long' >画像: </div>
+			<div class='cbf_inp' >ファイル名: </div>
 			<div class='cbf_input'>
-				<label for="img_fn_e" class="fuk_label" style="width:100px;height:100px;">
-					<input type="file" id="img_fn_e" class="img_fn" style="display:none" accept="image/*" title="画像ファイルのアップロード" />
-				</label>
+				<input type="text" name="file_name" class="valid " value=""  maxlength="512" title="512文字以内で入力してください" />
+				<label class="text-danger" for="file_name"></label>
 			</div>
 		</div>
+
 
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp' >画像ディレクトリパス: </div>
@@ -425,19 +459,21 @@ foreach($data as $i=>$ent){
 
 
 		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号A: </div>
+			<div class='cbf_inp' >番号A: </div>
 			<div class='cbf_input'>
-				<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="no_a" ></label>
+				<input type="text" name="no_a" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
+				<label class="text-danger" for="no_a"></label>
 			</div>
 		</div>
+
 		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号B: </div>
+			<div class='cbf_inp' >番号B: </div>
 			<div class='cbf_input'>
-				<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="no_b" ></label>
+				<input type="text" name="no_b" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
+				<label class="text-danger" for="no_b"></label>
 			</div>
 		</div>
+
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp' >rec_title: </div>
 			<div class='cbf_input'>
@@ -448,12 +484,13 @@ foreach($data as $i=>$ent){
 
 
 		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >親ID: </div>
+			<div class='cbf_inp' >親ID: </div>
 			<div class='cbf_input'>
-				<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="parent_id" ></label>
+				<input type="text" name="parent_id" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
+				<label class="text-danger" for="parent_id"></label>
 			</div>
 		</div>
+
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp_label' >公開: </div>
 			<div class='cbf_input'>

@@ -13,7 +13,7 @@ ssh -l amaraimusi amaraimusi.sakura.ne.jp "
 echo 'サーバー側のテーブルからsqlファイルをエクスポート完了しました。';
 
 echo 'sqlファイルをダウンロードします。'
-scp amaraimusi@amaraimusi.sakura.ne.jp:www/zss_rec2/shell/recs.sql recs.sql
+scp amaraimusi@amaraimusi.sakura.ne.jp:www/zss_rec2/shell/titles.sql titles.sql
 echo 'sqlファイルのダウンロードが完了しました。'
 
 
@@ -23,12 +23,12 @@ read pw
 echo '一旦テーブルをDROPします。'
 mysql -uroot -p$pw -e "
 	use zss_rec2;
-	drop table recs;
+	drop table titles;
 	"
 echo 'テーブルをDROPしました。'
 
 echo 'ローカル側にテーブルsqlをインポートします。'
-mysql -u root -p$pw zss_rec2 < recs.sql
+mysql -u root -p$pw zss_rec2 < titles.sql
 
 echo 'ローカル側テーブルにインポートしました。';
 

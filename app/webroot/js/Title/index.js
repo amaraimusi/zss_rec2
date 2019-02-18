@@ -2,6 +2,9 @@
 
 $(function() {
 	init();//初期化
+	
+	$('#title_tbl').show();// 高速表示のためテーブルは最後に表示する
+	
 });
 
 
@@ -43,6 +46,10 @@ function init(){
 	// 表示フィルターデータの定義とセット
 	var disFilData = {
 			// CBBXS-1008
+			'public_flg':{
+				'fil_type':'flg',
+				'option':{'list':['OFF','ON']}
+			},
 			'delete_flg':{
 				'fil_type':'delete_flg',
 			},
@@ -88,7 +95,25 @@ function init(){
 		}
 	});
 	
+	// リアクト機能の初期化■■■□□□■■■□□□■■■□□□開発中
+	crudBase.reactInit('title_tbl, hyo2');
 	
+	// CrudBase一括追加機能の初期化
+	var today = new Date().toLocaleDateString();
+	crudBase.crudBaseBulkAdd.init(
+		[
+			{'field':'title_name', 'inp_type':'textarea'}, 
+//			{'field':'title_val', 'inp_type':'textarea'}, 
+//			{'field':'title_group', 'inp_type':'select', 'list':titleGroupList, 'def':2}, 
+//			{'field':'title_date', 'inp_type':'date', 'def':today}, 
+//			{'field':'note', 'inp_type':'text', 'def':'TEST'}, 
+//			{'field':'sort_no', 'inp_type':'sort_no', 'def':1}, 
+		],
+		{
+			'ajax_url':'title/bulk_reg',
+			'ta_placeholder':"Excelからコピーしたタイトル名、タイトル数値を貼り付けてください。（タブ区切りテキスト）\n(例)\nタイトル名A\t100\nタイトル名B\t101\n",
+		}
+	);
 }
 
 /**
@@ -296,3 +321,10 @@ function searchKjs(){
 	crudBase.searchKjs();
 }
 
+/**
+ * カレンダーモード
+ */
+function calendarViewKShow(){
+	// カレンダービューを生成 
+	crudBase.calendarViewCreate('title_date');
+}

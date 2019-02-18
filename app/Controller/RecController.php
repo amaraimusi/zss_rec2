@@ -1,6 +1,6 @@
 <?php
 App::uses('CrudBaseController', 'Controller');
-App::uses('PagenationForCake', 'Vendor/Wacg');
+App::uses('PagenationForCake', 'Vendor/CrudBase');
 
 /**
  * 記録
@@ -8,8 +8,8 @@ App::uses('PagenationForCake', 'Vendor/Wacg');
  * @note
  * 記録画面では記録一覧を検索閲覧、編集など多くのことができます。
  * 
- * @date 2015-9-16 | 2018-10-10
- * @version 3.2.2
+ * @date 2015-9-16 | 2019-2-17
+ * @version 3.2.3
  *
  */
 class RecController extends CrudBaseController {
@@ -27,7 +27,7 @@ class RecController extends CrudBaseController {
 	public $defSortFeild='Rec.sort_no';
 	
 	/// デフォルトソートタイプ	  0:昇順 1:降順
-	public $defSortType=0;
+	public $defSortType=1;
 	
 	/// 検索条件情報の定義
 	public $kensakuJoken=array();
@@ -46,23 +46,22 @@ class RecController extends CrudBaseController {
 	
 	// 当画面バージョン (バージョンを変更すると画面に新バージョン通知とクリアボタンが表示されます。）
 	public $this_page_version = '1.9.1';
+
 	
-	/// リソース保存先・ディレクトリパス・テンプレート
-	public $dp_tmpl = '/photos/halther/%field/%via_dp/%dn/';
 	
-	/// 経由パスマッピング
-	public $viaDpFnMap = array('img_fn'=>'img_dp');// 例　'img_fn'=>'img_via_dp'
-
-
-
 	public function beforeFilter() {
 
-		if($this->action == 'front_a'){
-			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
-			if(empty($this->Auth->user())){
-				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
-			}
+		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+		if(empty($this->Auth->user())){
+			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
 		}
+		
+// 		if($this->action == 'front_a'){
+// 			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+// 			if(empty($this->Auth->user())){
+// 				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+// 			}
+// 		}
 	
 		parent::beforeFilter();
 	
@@ -81,6 +80,10 @@ class RecController extends CrudBaseController {
 		
 		// CrudBase共通処理（前）
 		$crudBaseData = $this->indexBefore('Rec');//indexアクションの共通先処理(CrudBaseController)
+		
+		// CBBXS-1019
+
+		// CBBXE
 		
 		//一覧データを取得
 		$data = $this->Rec->findData($crudBaseData);
@@ -120,11 +123,6 @@ class RecController extends CrudBaseController {
 	 */
 	public function front_a(){
 		
-		Configure::write('debug', 0);
-		
-		// フロントA用のコンポーネント
-		$this->RecFrontA = $this->Components->load('RecFrontA');
-
 		// CrudBase共通処理（前）
 		$option = array(
 				'func_csv_export'=>0, // CSVエクスポート機能 0:OFF ,1:ON
@@ -133,33 +131,41 @@ class RecController extends CrudBaseController {
 		$crudBaseData = $this->indexBefore('Rec',$option);//indexアクションの共通先処理(CrudBaseController)
 		
 		//一覧データを取得
-		$data = $this->Rec->findDataForFrontA($crudBaseData);
-		
-
-		// ▼ サブ画像集約ライブラリ
-		App::uses('SubImgAgg', 'Vendor/Wacg');
-		$subImgAgg = new SubImgAgg();
-		$data = $subImgAgg->agg($data,array(
-				'note_field' => 'note',			// ノートフィールド名
-				'img_fn_field' => 'img_fn' ,	// 画像フィールド名
-				'img_via_dp_field' => $this->viaDpFnMap['img_fn'], // 画像経由パスフィールド名
-				'dp_tmpl' => $this->dp_tmpl));	// ディレクトリパス・テンプレート
-		
-		
+		$data = $this->Rec->findData($crudBaseData);
 		
 		// CrudBase共通処理（後）
 		$crudBaseData = $this->indexAfter($crudBaseData,['method_url'=>'front_a']);//indexアクションの共通後処理
 		
-		$title_name = 'None';
-		if(!empty($data)){
-			$title_name = $data[0]['title_name'] . ' | ワクガンス';
-		}
+		// CBBXS-1020-2
+
+		// タイトルリスト
+		$titleIdList = $this->Rec->getTitleIdList();
+		$title_id_json = json_encode($titleIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
+		$this->set(array('titleIdList' => $titleIdList,'title_id_json' => $title_id_json));
+
+		// 記録カテゴリリスト
+		$recCtgIdList = $this->Rec->getRecCtgIdList();
+		$rec_ctg_id_json = json_encode($recCtgIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
+		$this->set(array('recCtgIdList' => $recCtgIdList,'rec_ctg_id_json' => $rec_ctg_id_json));
+
+		// CBBXE
+		
+		
+		// ▼ サブ画像集約ライブラリ
+		App::uses('SubImgAgg', 'Vendor/CrudBase');
+		$subImgAgg = new SubImgAgg();
+		$data = $subImgAgg->agg($data,array(
+				'note_field' => 'note',			// ノートフィールド名
+				'img_fn_field' => 'img_fn' ,	// 画像フィールド名
+				'midway_dp' => '/photos/halther/' ,
+			));	// ディレクトリパス・テンプレート
+		
 		
 		$this->set($crudBaseData);
 		$this->setCommon();//当画面系の共通セット
 		$this->set(array(
 				'header' => 'front_a_header',
-				'title_for_layout'=>$title_name,
+				'title_for_layout'=>'記録',
 				'data'=> $data,
 		));
 		
@@ -183,12 +189,11 @@ class RecController extends CrudBaseController {
 		App::uses('Sanitize', 'Utility');
 		$this->autoRender = false;//ビュー(ctp)を使わない。
 		$errs = array(); // エラーリスト
-		
 
-		// 認証中でなければエラー
-		if(empty($this->Auth->user())){
-			return 'Error:login is needed.';// 認証中でなければエラー
-		}
+// 		// 認証中でなければエラー
+// 		if(empty($this->Auth->user())){
+// 			return 'Error:login is needed.';// 認証中でなければエラー
+// 		}
 		
 		// 未ログインかつローカルでないなら、エラーアラートを返す。
 		if(empty($this->Auth->user()) && $_SERVER['SERVER_NAME']!='localhost'){
@@ -204,9 +209,10 @@ class RecController extends CrudBaseController {
 		$regParam = json_decode($reg_param_json,true);
 		$form_type = $regParam['form_type']; // フォーム種別 new_inp,edit,delete,eliminate
 
+		// CBBXS-1024
+$ent['img_fn'] = $this->makeFilePath($_FILES, 'rsc/img/%field/y%Y/m%m/orig/%Y%m%d%H%i%s_%fn', $ent, 'img_fn');
 
-		// アップロードファイル名を変換する。
-		$ent = $this->convUploadFileName($ent,$_FILES);
+		// CBBXE
 
 		// 更新ユーザーなど共通フィールドをセットする。
 		$ent = $this->setCommonToEntity($ent);
@@ -215,11 +221,13 @@ class RecController extends CrudBaseController {
 		$this->Rec->begin();
 		$ent = $this->Rec->saveEntity($ent,$regParam);
 		$this->Rec->commit();//コミット
+
+		// ファイルアップロードの一括作業
+		App::uses('FileUploadK','Vendor/CrudBase/FileUploadK');
+		$fileUploadK = new FileUploadK();
+		$res = $fileUploadK->putFile1($_FILES, 'img_fn', $ent['img_fn']);
 		
-		// ファイルアップロード関連の一括作業
-		$res = $this->workFileUploads($form_type,$this->dp_tmpl, $this->viaDpFnMap, $ent, $_FILES);
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
-		
 		
 		if($errs) $ent['err'] = implode("','",$errs); // フォームに表示するエラー文字列をセット
 
@@ -243,11 +251,9 @@ class RecController extends CrudBaseController {
 	 * また、DBから実際に削除する抹消にも対応している。
 	 */
 	public function ajax_delete(){
-		App::uses('Sanitize', 'Utility');
-	
-		$this->autoRender = false;//ビュー(ctp)を使わない。
-		if(empty($this->Auth->user())) return 'Error:login is needed.';// 認証中でなければエラー
-	
+
+ 		$this->autoRender = false;//ビュー(ctp)を使わない。
+
 		// JSON文字列をパースしてエンティティを取得する
 		$json=$_POST['key1'];
 		$ent0 = json_decode($json,true);
@@ -269,15 +275,14 @@ class RecController extends CrudBaseController {
 		if($eliminate_flg == 0){
 			$ent = $this->Rec->saveEntity($ent,$regParam); // 更新
 		}else{
-			$this->Rec->eliminateFiles($ent['id'], 'img_fn', $ent, $this->dp_tmpl, $this->viaDpFnMap); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
+			$this->Rec->eliminateFiles($ent['id'], 'img_fn', $ent); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
 			$this->Rec->delete($ent['id']); // 削除
 		}
 		$this->Rec->commit();//コミット
+		
+		$json_str =json_encode($ent);//JSONに変換
 	
-		$ent=Sanitize::clean($ent, array('encode' => true));//サニタイズ（XSS対策）
-		$json_data=json_encode($ent);//JSONに変換
-	
-		return $json_data;
+		return $json_str;
 	}
 	
 	
@@ -311,8 +316,41 @@ class RecController extends CrudBaseController {
 		return $json_str;
 	}
 	
+	/**
+	 * 一括登録 | AJAX
+	 * 
+	 * @note
+	 * 一括追加, 一括編集, 一括複製
+	 */
+	public function bulk_reg(){
+		
+		App::uses('DaoForCake', 'Model');
+		App::uses('BulkReg', 'Vendor/CrudBase');
+		
+		$this->autoRender = false;//ビュー(ctp)を使わない。
+		
+		
+		// 更新ユーザーを取得
+		$update_user = 'none';
+		if(!empty($this->Auth->user())){
+			$userData = $this->Auth->user();
+			$update_user = $userData['username'];
+		}
 
-	
+		$json_param=$_POST['key1'];
+		$param = json_decode($json_param,true);//JSON文字を配列に戻す
+		
+		// 一括登録
+		$dao = new DaoForCake();
+		$bulkReg = new BulkReg($dao, $update_user);
+		$res = $bulkReg->reg('recs', $param);
+		
+		//JSONに変換
+		$str_json = json_encode($res,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
+		
+		return $str_json;
+	}
+
 	
 	/**
 	 * CSVインポート | AJAX
@@ -347,15 +385,18 @@ class RecController extends CrudBaseController {
 		//ダウンロード用のデータを取得する。
 		$data = $this->getDataForDownload();
 		
-		
-		// ユーザーエージェントなど特定の項目をダブルクォートで囲む
-		foreach($data as $i=>$ent){
-			if(!empty($ent['user_agent'])){
-				$data[$i]['user_agent']='"'.$ent['user_agent'].'"';
+		// ダブルクォートで値を囲む
+		foreach($data as &$ent){
+			unset($ent['xml_text']);
+			foreach($ent as $field => $value){
+				if(mb_strpos($value,'"')!==false){
+					$value = str_replace('"', '""', $value);
+				}
+				$value = '"' . $value . '"';
+				$ent[$field] = $value;
 			}
 		}
-
-		
+		unset($ent);
 		
 		//列名配列を取得
 		$clms=array_keys($data[0]);
@@ -371,7 +412,7 @@ class RecController extends CrudBaseController {
 	
 	
 		//CSVダウンロード
-		App::uses('CsvDownloader','Vendor/Wacg');
+		App::uses('CsvDownloader','Vendor/CrudBase');
 		$csv= new CsvDownloader();
 		$csv->output($fn, $data);
 		 
@@ -458,14 +499,18 @@ class RecController extends CrudBaseController {
 				// CBBXS-1000 
 			array('name'=>'kj_id','def'=>null),
 			array('name'=>'kj_title_id','def'=>null),
-			array('name'=>'kj_rec_date','def'=>null),
+			array('name'=>'kj_rec_date1','def'=>null),
+			array('name'=>'kj_rec_date2','def'=>null),
 			array('name'=>'kj_note','def'=>null),
 			array('name'=>'kj_rec_ctg_id','def'=>null),
 			array('name'=>'kj_img_fn','def'=>null),
+			array('name'=>'kj_file_name','def'=>null),
 			array('name'=>'kj_img_dp','def'=>null),
 			array('name'=>'kj_ref_url','def'=>null),
-			array('name'=>'kj_no_a','def'=>null),
-			array('name'=>'kj_no_b','def'=>null),
+			array('name'=>'kj_no_a1','def'=>null),
+			array('name'=>'kj_no_a2','def'=>null),
+			array('name'=>'kj_no_b1','def'=>null),
+			array('name'=>'kj_no_b2','def'=>null),
 			array('name'=>'kj_rec_title','def'=>null),
 			array('name'=>'kj_parent_id','def'=>null),
 			array('name'=>'kj_public_flg','def'=>null),
@@ -478,7 +523,7 @@ class RecController extends CrudBaseController {
 
 				// CBBXE
 				
-			array('name'=>'row_limit','def'=>20),
+				array('name'=>'row_limit','def'=>50),
 				
 		);
 		
@@ -504,17 +549,20 @@ class RecController extends CrudBaseController {
 								'allowEmpty' => true
 						),
 				),
-				'kj_rec_date'=> array(
-						'maxLength'=>array(
-								'rule' => array('maxLength', 20),
-								'message' => '記録日付は20文字以内で入力してください',
-								'allowEmpty' => true
-						),
+				'kj_rec_date1'=> array(
+						'rule' => array( 'date', 'ymd'),
+						'message' => '記録日付【範囲1】は日付形式【yyyy-mm-dd】で入力してください。',
+						'allowEmpty' => true
+				),
+				'kj_rec_date2'=> array(
+						'rule' => array( 'date', 'ymd'),
+						'message' => '記録日付【範囲2】は日付形式【yyyy-mm-dd】で入力してください。',
+						'allowEmpty' => true
 				),
 				'kj_note'=> array(
 						'maxLength'=>array(
-								'rule' => array('maxLength', 1000),
-								'message' => 'ノートは1000文字以内で入力してください',
+								'rule' => array('maxLength', 255),
+								'message' => 'ノートは0文字以内で入力してください',
 								'allowEmpty' => true
 						),
 				),
@@ -528,7 +576,14 @@ class RecController extends CrudBaseController {
 				'kj_img_fn'=> array(
 						'maxLength'=>array(
 								'rule' => array('maxLength', 255),
-								'message' => '画像は128文字以内で入力してください',
+								'message' => '画像は512文字以内で入力してください',
+								'allowEmpty' => true
+						),
+				),
+				'kj_file_name'=> array(
+						'maxLength'=>array(
+								'rule' => array('maxLength', 255),
+								'message' => 'ファイル名は512文字以内で入力してください',
 								'allowEmpty' => true
 						),
 				),
@@ -546,16 +601,30 @@ class RecController extends CrudBaseController {
 								'allowEmpty' => true
 						),
 				),
-				'kj_no_a' => array(
+				'kj_no_a1' => array(
 						'custom'=>array(
 								'rule' => array( 'custom', '/^[-]?[0-9]+$/' ),
 								'message' => '番号Aは整数を入力してください。',
 								'allowEmpty' => true
 						),
 				),
-				'kj_no_b' => array(
+				'kj_no_a2' => array(
+						'custom'=>array(
+								'rule' => array( 'custom', '/^[-]?[0-9]+?$/' ),
+								'message' => '番号Aは整数を入力してください。',
+								'allowEmpty' => true
+						),
+				),
+				'kj_no_b1' => array(
 						'custom'=>array(
 								'rule' => array( 'custom', '/^[-]?[0-9]+$/' ),
+								'message' => '番号Bは整数を入力してください。',
+								'allowEmpty' => true
+						),
+				),
+				'kj_no_b2' => array(
+						'custom'=>array(
+								'rule' => array( 'custom', '/^[-]?[0-9]+?$/' ),
 								'message' => '番号Bは整数を入力してください。',
 								'allowEmpty' => true
 						),
@@ -564,13 +633,6 @@ class RecController extends CrudBaseController {
 						'maxLength'=>array(
 								'rule' => array('maxLength', 255),
 								'message' => 'rec_titleは50文字以内で入力してください',
-								'allowEmpty' => true
-						),
-				),
-				'kj_parent_id' => array(
-						'naturalNumber'=>array(
-								'rule' => array('naturalNumber', true),
-								'message' => '親IDは数値を入力してください',
 								'allowEmpty' => true
 						),
 				),
@@ -651,10 +713,15 @@ class RecController extends CrudBaseController {
 					'row_order'=>'Rec.img_fn',
 					'clm_show'=>1,
 			),
+			'file_name'=>array(
+					'name'=>'ファイル名',
+					'row_order'=>'Rec.file_name',
+					'clm_show'=>0,
+			),
 			'img_dp'=>array(
 					'name'=>'画像ディレクトリパス',
 					'row_order'=>'Rec.img_dp',
-					'clm_show'=>1,
+					'clm_show'=>0,
 			),
 			'ref_url'=>array(
 					'name'=>'参照URL',
@@ -674,7 +741,7 @@ class RecController extends CrudBaseController {
 			'rec_title'=>array(
 					'name'=>'rec_title',
 					'row_order'=>'Rec.rec_title',
-					'clm_show'=>0,
+					'clm_show'=>1,
 			),
 			'parent_id'=>array(
 					'name'=>'親ID',

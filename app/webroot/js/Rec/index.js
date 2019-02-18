@@ -3,7 +3,7 @@
 $(function() {
 	init();//初期化
 	
-	$('#rec_tbl').show();
+	$('#rec_tbl').show();// 高速表示のためテーブルは最後に表示する
 	
 });
 
@@ -38,7 +38,7 @@ function init(){
 	crudBase = new CrudBase({
 			'src_code':'rec', // 画面コード（スネーク記法)
 			'kjs':kjs,
-			'ni_tr_place':0,
+			'ni_tr_place':1,
 		});
 	
 
@@ -99,7 +99,23 @@ function init(){
 		}
 	});
 	
+	// リアクト機能の初期化■■■□□□■■■□□□■■■□□□開発中
+	crudBase.reactInit('rec_tbl, hyo2');
 	
+	// CrudBase一括追加機能の初期化
+	var today = new Date().toLocaleDateString();
+	crudBase.crudBaseBulkAdd.init(
+		[
+			{'field':'note', 'inp_type':'textarea'}, 
+			{'field':'title_id', 'inp_type':'select', 'list':titleIdList, 'def':2}, 
+			{'field':'rec_date', 'inp_type':'date', 'def':today}, 
+			{'field':'sort_no', 'inp_type':'sort_no', 'def':1}, 
+		],
+		{
+			'ajax_url':'rec/bulk_reg',
+			'ta_placeholder':"Excelからコピーした記録名、記録数値を貼り付けてください。（タブ区切りテキスト）\n(例)\n記録名A\t100\n記録名B\t101\n",
+		}
+	);
 }
 
 /**
@@ -107,26 +123,7 @@ function init(){
  * @param btnElm ボタン要素
  */
 function newInpShow(btnElm, ni_tr_place){
-	
-	var option = {'ni_tr_place':ni_tr_place};
-	crudBase.newInpShow(btnElm, option, (param) =>{
-		// フォームに一覧の行データを自動セットしたあとに呼び出されるコールバック関数
-		
-		// 本日を取得
-		var today = new Date(); 
-		var today2 = today.toLocaleDateString();
-		
-		// 年月を取得
-		var year = today.getFullYear(); //年
-		var month = today.getMonth(); //月
-		var ym = year + '_' + month;
-//		var day = date1.getDate(); //日
-		
-		var form = param.form;
-		form.find("[name='rec_date']").val(today2);
-		form.find("[name='img_dp']").val(ym);
-		
-	});
+	crudBase.newInpShow(btnElm, {'ni_tr_place':ni_tr_place});
 }
 
 /**
@@ -326,3 +323,10 @@ function searchKjs(){
 	crudBase.searchKjs();
 }
 
+/**
+ * カレンダーモード
+ */
+function calendarViewKShow(){
+	// カレンダービューを生成 
+	crudBase.calendarViewCreate('rec_date');
+}

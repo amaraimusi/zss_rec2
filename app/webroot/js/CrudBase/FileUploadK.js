@@ -190,7 +190,7 @@ class FileUploadK{
 	 * @param object option addEventのoptionと同じ
 	 */
 	setFilePaths(fue_id,fps,option){
-		
+
 		if(option == null) option = {};
 		
 		this._clearBtnAction(fue_id); // クリアボタンアクション
@@ -202,10 +202,8 @@ class FileUploadK{
 		fukMsg.html('Now Loading ..');
 		
 		var bData = [];
-		
 		option['pacb'] = () => {
 			//複数非同期・全終了後コールバック
-			
 			// プレビュー表示
 			this.box[fue_id]['bData'] = bData;
 			this._preview(fue_id,'blob',option);
@@ -621,6 +619,8 @@ class FileUploadK{
 	 */
 	_validCheck(fue_id,fileData){
 
+		if(fue_id == null) return fileData;
+		
 		var validData = this.box[fue_id]['validData']; // バリデーションデータ
 		var validExts = validData.validExts; // バリデーション拡張子リスト
 

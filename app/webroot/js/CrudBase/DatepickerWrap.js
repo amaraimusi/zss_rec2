@@ -16,8 +16,8 @@
  * 		jquery.ui.ympicker.js
  * 		jquery.datetimepicker.full.min.js
  * 
- * @version 2.0.0
- * @date 2015-7-1 | 2018-10-9
+ * @version 2.0.1
+ * @date 2015-7-1 | 2019-1-25
  * @history
  * 2018-10-09 v2.0.0 YmpickerWrapからDatepickerWrapに名称変更
  * 2015-09-17 バグ修正
@@ -36,6 +36,8 @@ class DatepickerWrap{
 	 */
 	constructor(param){
 
+		if(jQuery.datepicker == null) return;
+		
 		this.param = this._setParamIfEmpty(param);
 		
 		// カレンダーを日本語化する

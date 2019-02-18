@@ -1,7 +1,7 @@
 	<div class="navbar navbar-default navbar-fixed-top">
 	  <div class="container">
 		<div class="navbar-header">
-		  <?php echo $this->Html->link('CakeDemo', '/', array('class' => 'navbar-brand', 'escape' => false)); ?>
+		  <?php echo $this->Html->link('ZssRec2', '/', array('class' => 'navbar-brand', 'escape' => false)); ?>
 		  <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>

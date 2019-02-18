@@ -5,8 +5,8 @@ App::uses('CrudBase', 'Model');
 /**
  * 記録カテゴリのCakePHPモデルクラス
  *
- * @date 2015-9-16 | 2018-10-3
- * @version 3.1.0
+ * @date 2015-9-16 | 2018-10-10
+ * @version 3.1.2
  *
  */
 class RecCtg extends AppModel {
@@ -271,10 +271,10 @@ class RecCtg extends AppModel {
 	 * 
 	 * @param int $id
 	 * @param string $fn_field_strs ファイルフィールド群文字列（複数ある場合はコンマで連結）
-	 * @param array $dtpData ディレクトリパステンプレート情報
+	 * @param array $ent エンティティ
 	 */
-	public function eliminateFiles($id,$fn_field_strs,&$dtpData){
-		$this->CrudBase->eliminateFiles($this,$id,$fn_field_strs,$dtpData);
+	public function eliminateFiles($id, $fn_field_strs, &$ent){
+		$this->CrudBase->eliminateFiles($this, $id, $fn_field_strs, $ent);
 	}
 	
 	

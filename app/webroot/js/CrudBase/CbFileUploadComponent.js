@@ -4,9 +4,10 @@
  * @note
  * CurdBase.jsのコンポーネントの一つ
  * 
- * @date 2018-8-24 | 2018-10-9
- * @version 1.1.3
+ * @date 2018-8-24 | 2019-2-13
+ * @version 1.2.0
  * @history
+ * 2019-2-13 v1.2.0 経由パス関連を廃止
  * 2018-10-9 v1.1.3 経由ディレクトリパスに対応
  * 2018-9-19 v1.1.2 ファイルアップロード機能：DnDに対応
  * 2018-9-18 v1.1.1 コールバックパラメータを追加（pacb_param)
@@ -31,38 +32,7 @@ class CbFileUploadComponent{
 		
 		this.fuIds = fuIds; // file要素idリスト
 		this.fields = this._fueIdsToFields(fuIds); // FUフィールドリスト
-		this.dpData = this._makeDtData(this.fields); // ディレクトリパス情報
 		this.none_img_fp = 'img/icon/none.gif';
-		
-	}
-	
-	/**
-	 * ディレクトリパス情報
-	 * @param array fuIds file要素idリスト
-	 * @return array ディレクトリパス情報
-	 */
-	_makeDtData(fields){
-		var dpData = {}; // ディレクトリパスデータ
-		
-		// リソース保存先・ディレクトリパス・テンプレート
-		var dp_tmpl = jQuery('#dp_tmpl').val();
-
-		var dns = ['orig','mid','thum']; // ディレクトリパスタイプリスト
-		
-		for(var dn_i in dns){
-			var dn = dns[dn_i];
-
-			for(var i in fields){
-				var field = fields[i];
-				var dp = dp_tmpl;
-				var dp = dp.replace('%field',field);
-				dp = dp.replace('%dn',dn);
-				if(dpData[field] == null) dpData[field] = {};
-				dpData[field][dn] = dp;
-			}
-		}
-
-		return dpData;
 		
 	}
 	
@@ -205,81 +175,16 @@ class CbFileUploadComponent{
 	/**
 	 * file要素にファイルパスをセットする
 	 * @param string fue_id file要素のid
-	 * @param array fn ファイル名リスト（ ファイル名一つを文字列指定可）
+	 * @param array fps ファイル名リスト（ ファイル名一つを文字列指定可）
 	 * @param object option addEventのoptionと同じ
 	 */
-	setFilePaths(fue_id,fns,via_dps,option){
+	setFilePaths(fue_id,fps,option){
 
-		if(typeof fns == 'string') fns = [fns];
-		if(via_dps == null) via_dps = [''];
-		if(typeof via_dps == 'string') via_dps = [via_dps];
-
-		var field = this._fudIdToField(fue_id); // file要素idからフィールドに変換する。
-		var dp = this.dpData[field]['mid']; // ディレクトリパスを取得
-
-		// ファイルパスリストを組み立て
-		var fps = [];
-		for(var i in fns){
-			var fn = fns[i];
-			var via_dp = via_dps[i];
-			var fp = this._joinDpFn(dp,via_dp,fn); // ディレクトリとファイル名を連結してファイルパスを作成
-			fps.push(fp);
-		}
-		
 		// file要素にファイルパスをセットする
-		this.fileUploadK.setFilePaths(fue_id,fps,option);
-		
-		var res = {'fps':fps};
-		
+		var res = this.fileUploadK.setFilePaths(fue_id,fps,option);
+
 		return res;
-		
-		
-	}
-	
-	
-	/**
-	 * ディレクトリとファイル名を連結してファイルパスを作成
-	 * 
-	 * @note
-	 * ディレクトリパス末尾のセパレータ有無を自動判別してファイルパスを作成する。
-	 * 2種類のセパレータ,「/」と「\」に対応している。
-	 *
-	 * @param dp ディレクトリパス
-	 * @param via_dp 経由ディレクトリパス
-	 * @param fn ファイル名
-	 * @returns string ファイルパス
-	 */
-	_joinDpFn(dp,via_dp,fn){
-		
-		var fp = ''; // ファイルパス
-		
-		// ディレクトリパスの経由ディレクトリパス部分を置換する
-		dp = dp.replace('%via_dp',via_dp);
-		dp = dp.replace('//','/');
-		
-		// ディレクトリパスが空であるならファイル名をファイルパスとして返す。
-		if(dp == null || dp == '' || dp == 0) return fn;
-	
-		var end_str = dp.slice(-1); // ディレクトリパスから末尾の一文字を取得する。
-		
-		// 末尾の一文字がセパレータである場合
-		if(end_str == '/' || end_str == '\\'){
-			fp = dp + fn;
-		}
-		
-		// 末尾の一文字がセパレータでない場合
-		else{
-			
-			// セパレータを取得
-			var sep = '/';
-			var i = dp.lastIndexOf('\\');
-			if(i >= 0) sep = '\\';
-			
-			fp = dp + sep + fn;
-		}
-		
-	
-		return fp;
+
 	}
 	
 	
@@ -287,9 +192,8 @@ class CbFileUploadComponent{
 	 * 画像をTR要素に表示する
 	 * @param jQuery tr TR要素オブジェクト
 	 * @param object ent データエンティティ
-	 * @param object viaDpFnMap 経由パスマッピング
 	 */
-	setImageToTr(tr,ent,viaDpFnMap){
+	setImageToTr(tr,ent){
 
 		for(var i in this.fields){
 			var field = this.fields[i];
@@ -300,10 +204,10 @@ class CbFileUploadComponent{
 			var imgElm = lbl.find('img');
 			if(imgElm[0]){
 				
-				var fn = ent[field]; // ファイル名
+				var fp = ent[field]; // ファイル名
 				
 				// ファイル名が空である場合、空画像パスをセットする。
-				if(fn == null || fn == ''){
+				if(fp == null || fp == ''){
 					imgElm.attr('src',this.none_img_fp);
 					var aElm = lbl.find('a');
 					if(aElm[0]){
@@ -311,18 +215,9 @@ class CbFileUploadComponent{
 					}
 					return;
 				}
-
-				// 経由ディレクトリパスを取得する
-				var via_dp = '';
-				if(viaDpFnMap[field] != null){
-					var via_dp_field = viaDpFnMap[field];
-					via_dp = ent[via_dp_field];
-				}
 				
-				var orig_dp = this.dpData[field]['orig']; // オリジナルディレクトリパス
-				var orig_fp = this._joinDpFn(orig_dp,via_dp,fn); // オリジナルファイルパス
-				var thum_dp = this.dpData[field]['thum']; // サムネイルディレクトリパス
-				var thum_fp = this._joinDpFn(thum_dp,via_dp,fn); // サムネイルファイルパス
+				var orig_fp = fp; // オリジナルファイルパス
+				var thum_fp = fp.replace('/orig/', '/thum/'); // サムネイルファイルパス
 
 				// IMG要素に画像を表示する。
 				var imgObj = new Image();
@@ -352,20 +247,20 @@ class CbFileUploadComponent{
 	 * @return FileData FD
 	 */
 	setFilesToFd(fd,form_type){
-		
+
 		var box = this.fileUploadK.box;
 
 		for(var fu_id in box){
+
 			var fieldInfo = this._getFieldInfoFromFuKey(fu_id); // fu_keyからフィールドInfoを取得する
 			if(fieldInfo.form_type != form_type) continue;
-			
+
 			var files = box[fu_id]['files']; // FDにセット予定のファイルオブジェクトを取得する
 			if(files == null) continue;
 			if(files[0] == null) continue;
 			
 			var fileData = box[fu_id]['fileData']; // エラーチェックのためにフィールドデータを取得 （フィールドデータにはFU要素やDnD由来のMIME,サイズ、ファイル名がセットされている。）
 			if(fileData[0] == null) continue;
-			
 			var fEnt = fileData[0]; // フィールドエンティティを取得 (単一アップロードなので一行目のみ取得)
 			if(fEnt.err_flg == false){ // エラーでない場合
 				fd.append(fieldInfo.field, files[0]); // FDにファイルオブジェクトをセットする

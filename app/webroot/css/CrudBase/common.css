@@ -1,11 +1,10 @@
 /* 
-* @version 1.1.1 
-* @date 2015-1-1 | 2016-12-28
+* @version 1.2.0
+* @date 2015-1-1 | 2019-1-25
 */
 @CHARSET "UTF-8";
 
 body {
-	padding-top: 60px;
 	padding-bottom: 40px;
 }
 .sidebar-nav {
@@ -211,7 +210,7 @@ border-radius: 35px;
 }
 .table_transform tbody tr{
 	display:block;
-	border-bottom:solid #2c2255 1px;
+	border-bottom:none;
 }
 .table_transform tbody tr td{
 	display:block;
@@ -254,5 +253,59 @@ border-radius: 35px;
 }
 .cbf_inp_wrap_long .cbf_input textarea{
 	width:100%;
+}
+
+.hash_tag0{
+	display:inline-block;
+	padding:2px 4px;
+	margin-right:6px;
+}
+
+.hash_tag1{
+	display:inline-block;
+	padding:2px 4px;
+	margin-right:4px;
+	background-color:#4a8af4;
+	color:white;
+	border-radius:4px;
+}
+
+
+.cb_breadcrumbs{
+	display:inline-block;
+}
+.cb_kj_main{
+	margin-left:20px;
+	display:inline-block;
+}
+.kj_div{
+	display:inline-block;
+	width:auto;
+	height:auto;
+	margin-right:20px;
+	margin-top:4px;
+	margin-bottom:4px;
+}
+.cb_kj_detail{
+	background-color:#eeeeee;
+	border-radius:5px;
+	padding:10px;
+	
+}
+#cb_func_btns{
+	margin-left:20px;
+	display:inline-block;
+}
+.hr_purple{
+	border-top: solid 1px #9954bb;
+}
+#clm_cbs_rap{
+	margin-top: 10px;
+	margin-bottom: 30px;
+	border-top: solid 1px #9954bb;
+	padding: 4px;
+}
+#clm_cbs_rap p{
+	color:#9954bb;
 }
 

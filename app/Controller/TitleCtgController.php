@@ -1,6 +1,6 @@
 <?php
 App::uses('CrudBaseController', 'Controller');
-App::uses('PagenationForCake', 'Vendor/Wacg');
+App::uses('PagenationForCake', 'Vendor/CrudBase');
 
 /**
  * タイトルカテゴリ
@@ -8,8 +8,8 @@ App::uses('PagenationForCake', 'Vendor/Wacg');
  * @note
  * タイトルカテゴリ画面ではタイトルカテゴリ一覧を検索閲覧、編集など多くのことができます。
  * 
- * @date 2015-9-16 | 2018-10-4 フロントAページ追加
- * @version 3.2.0
+ * @date 2015-9-16 | 2019-2-17
+ * @version 3.2.3
  *
  */
 class TitleCtgController extends CrudBaseController {
@@ -45,16 +45,23 @@ class TitleCtgController extends CrudBaseController {
 	public $edit_validate = array();
 	
 	// 当画面バージョン (バージョンを変更すると画面に新バージョン通知とクリアボタンが表示されます。）
-	public $this_page_version = '1.9.1'; 
+	public $this_page_version = '1.9.1';
 
-
-
+	
+	
 	public function beforeFilter() {
 
 		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
 		if(empty($this->Auth->user())){
 			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
 		}
+		
+// 		if($this->action == 'front_a'){
+// 			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+// 			if(empty($this->Auth->user())){
+// 				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+// 			}
+// 		}
 	
 		parent::beforeFilter();
 	
@@ -74,12 +81,20 @@ class TitleCtgController extends CrudBaseController {
 		// CrudBase共通処理（前）
 		$crudBaseData = $this->indexBefore('TitleCtg');//indexアクションの共通先処理(CrudBaseController)
 		
+		// CBBXS-1019
+
+		// CBBXE
+		
 		//一覧データを取得
 		$data = $this->TitleCtg->findData($crudBaseData);
 
 		// CrudBase共通処理（後）
 		$crudBaseData = $this->indexAfter($crudBaseData);//indexアクションの共通後処理
+		
+		// CBBXS-1020
 
+		// CBBXE
+		
 		$this->set($crudBaseData);
 		$this->set(array(
 			'title_for_layout'=>'タイトルカテゴリ',
@@ -98,18 +113,12 @@ class TitleCtgController extends CrudBaseController {
 	 */
 	public function front_a(){
 		
-		// フロントA用のコンポーネント
-		$this->TitleCtgFrontA = $this->Components->load('TitleCtgFrontA');
-
 		// CrudBase共通処理（前）
 		$option = array(
 				'func_csv_export'=>0, // CSVエクスポート機能 0:OFF ,1:ON
 				'func_file_upload'=>1, // ファイルアップロード機能 0:OFF , 1:ON
 		);
 		$crudBaseData = $this->indexBefore('TitleCtg',$option);//indexアクションの共通先処理(CrudBaseController)
-		
-		// ディレクトリパステンプレートを調整する(パスはindex用の相対パスになっているのでズレを調整しなければならない）
-		$crudBaseData['dptData'] = $this->TitleCtgFrontA->adjustDpt($crudBaseData['dptData']);
 		
 		//一覧データを取得
 		$data = $this->TitleCtg->findData($crudBaseData);
@@ -120,6 +129,16 @@ class TitleCtgController extends CrudBaseController {
 		// CBBXS-1020-2
 
 		// CBBXE
+		
+		
+// 		// ▼ サブ画像集約ライブラリ
+// 		App::uses('SubImgAgg', 'Vendor/CrudBase');
+// 		$subImgAgg = new SubImgAgg();
+// 		$data = $subImgAgg->agg($data,array(
+// 				'note_field' => 'note',			// ノートフィールド名
+// 				'img_fn_field' => 'img_fn' ,	// 画像フィールド名
+//			));	// ディレクトリパス・テンプレート
+		
 		
 		$this->set($crudBaseData);
 		$this->setCommon();//当画面系の共通セット
@@ -132,41 +151,6 @@ class TitleCtgController extends CrudBaseController {
 		
 		
 	}
-	
-
-	/**
-	 * 詳細画面
-	 * 
-	 * タイトルカテゴリ情報の詳細を表示します。
-	 * この画面から入力画面に遷移できます。
-	 * 
-	 */
-	public function detail() {
-		
-		$res=$this->edit_before('TitleCtg');
-		$ent=$res['ent'];
-	
-
-		$this->set(array(
-				'title_for_layout'=>'タイトルカテゴリ・詳細',
-				'ent'=>$ent,
-		));
-		
-		//当画面系の共通セット
-		$this->setCommon();
-	
-	}
-
-
-
-
-
-
-
-
-
-
-
 
 
 	
@@ -184,12 +168,11 @@ class TitleCtgController extends CrudBaseController {
 		App::uses('Sanitize', 'Utility');
 		$this->autoRender = false;//ビュー(ctp)を使わない。
 		$errs = array(); // エラーリスト
-		
 
-		// 認証中でなければエラー
-		if(empty($this->Auth->user())){
-			return 'Error:login is needed.';// 認証中でなければエラー
-		}
+// 		// 認証中でなければエラー
+// 		if(empty($this->Auth->user())){
+// 			return 'Error:login is needed.';// 認証中でなければエラー
+// 		}
 		
 		// 未ログインかつローカルでないなら、エラーアラートを返す。
 		if(empty($this->Auth->user()) && $_SERVER['SERVER_NAME']!='localhost'){
@@ -205,6 +188,10 @@ class TitleCtgController extends CrudBaseController {
 		$regParam = json_decode($reg_param_json,true);
 		$form_type = $regParam['form_type']; // フォーム種別 new_inp,edit,delete,eliminate
 
+		// CBBXS-1024
+
+		// CBBXE
+
 		// 更新ユーザーなど共通フィールドをセットする。
 		$ent = $this->setCommonToEntity($ent);
 	
@@ -213,6 +200,11 @@ class TitleCtgController extends CrudBaseController {
 		$ent = $this->TitleCtg->saveEntity($ent,$regParam);
 		$this->TitleCtg->commit();//コミット
 
+		// ファイルアップロードの一括作業
+		App::uses('FileUploadK','Vendor/CrudBase/FileUploadK');
+		$fileUploadK = new FileUploadK();
+		$res = $fileUploadK->putFile1($_FILES, 'img_fn', $ent['img_fn']);
+		
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
 		
 		if($errs) $ent['err'] = implode("','",$errs); // フォームに表示するエラー文字列をセット
@@ -237,11 +229,9 @@ class TitleCtgController extends CrudBaseController {
 	 * また、DBから実際に削除する抹消にも対応している。
 	 */
 	public function ajax_delete(){
-		App::uses('Sanitize', 'Utility');
-	
-		$this->autoRender = false;//ビュー(ctp)を使わない。
-		if(empty($this->Auth->user())) return 'Error:login is needed.';// 認証中でなければエラー
-	
+
+ 		$this->autoRender = false;//ビュー(ctp)を使わない。
+
 		// JSON文字列をパースしてエンティティを取得する
 		$json=$_POST['key1'];
 		$ent0 = json_decode($json,true);
@@ -263,16 +253,14 @@ class TitleCtgController extends CrudBaseController {
 		if($eliminate_flg == 0){
 			$ent = $this->TitleCtg->saveEntity($ent,$regParam); // 更新
 		}else{
-			$dtpData = $this->getDptData(); // ディレクトリパステンプレート情報
-			$this->TitleCtg->eliminateFiles($ent['id'],'img_fn',$dtpData); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
+			$this->TitleCtg->eliminateFiles($ent['id'], 'img_fn', $ent); // ファイル抹消（他のレコードが保持しているファイルは抹消対象外）
 			$this->TitleCtg->delete($ent['id']); // 削除
 		}
 		$this->TitleCtg->commit();//コミット
+		
+		$json_str =json_encode($ent);//JSONに変換
 	
-		$ent=Sanitize::clean($ent, array('encode' => true));//サニタイズ（XSS対策）
-		$json_data=json_encode($ent);//JSONに変換
-	
-		return $json_data;
+		return $json_str;
 	}
 	
 	
@@ -306,8 +294,41 @@ class TitleCtgController extends CrudBaseController {
 		return $json_str;
 	}
 	
+	/**
+	 * 一括登録 | AJAX
+	 * 
+	 * @note
+	 * 一括追加, 一括編集, 一括複製
+	 */
+	public function bulk_reg(){
+		
+		App::uses('DaoForCake', 'Model');
+		App::uses('BulkReg', 'Vendor/CrudBase');
+		
+		$this->autoRender = false;//ビュー(ctp)を使わない。
+		
+		
+		// 更新ユーザーを取得
+		$update_user = 'none';
+		if(!empty($this->Auth->user())){
+			$userData = $this->Auth->user();
+			$update_user = $userData['username'];
+		}
 
-	
+		$json_param=$_POST['key1'];
+		$param = json_decode($json_param,true);//JSON文字を配列に戻す
+		
+		// 一括登録
+		$dao = new DaoForCake();
+		$bulkReg = new BulkReg($dao, $update_user);
+		$res = $bulkReg->reg('title_ctgs', $param);
+		
+		//JSONに変換
+		$str_json = json_encode($res,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
+		
+		return $str_json;
+	}
+
 	
 	/**
 	 * CSVインポート | AJAX
@@ -319,7 +340,7 @@ class TitleCtgController extends CrudBaseController {
 		$this->autoRender = false;//ビュー(ctp)を使わない。
 		if(empty($this->Auth->user())) return 'Error:login is needed.';// 認証中でなければエラー
 		
-		$this->csv_fu_base($this->TitleCtg,array('id','title_ctg_val','title_ctg_name','title_ctg_date','title_ctg_group','title_ctg_dt','img_fn','note','sort_no'));
+		$this->csv_fu_base($this->TitleCtg,array('id','title_ctg_val','title_ctg_name','title_ctg_date','title_ctg_group','title_ctg_dt','title_ctg_flg','img_fn','note','sort_no'));
 		
 	}
 	
@@ -342,15 +363,18 @@ class TitleCtgController extends CrudBaseController {
 		//ダウンロード用のデータを取得する。
 		$data = $this->getDataForDownload();
 		
-		
-		// ユーザーエージェントなど特定の項目をダブルクォートで囲む
-		foreach($data as $i=>$ent){
-			if(!empty($ent['user_agent'])){
-				$data[$i]['user_agent']='"'.$ent['user_agent'].'"';
+		// ダブルクォートで値を囲む
+		foreach($data as &$ent){
+			unset($ent['xml_text']);
+			foreach($ent as $field => $value){
+				if(mb_strpos($value,'"')!==false){
+					$value = str_replace('"', '""', $value);
+				}
+				$value = '"' . $value . '"';
+				$ent[$field] = $value;
 			}
 		}
-
-		
+		unset($ent);
 		
 		//列名配列を取得
 		$clms=array_keys($data[0]);
@@ -366,7 +390,7 @@ class TitleCtgController extends CrudBaseController {
 	
 	
 		//CSVダウンロード
-		App::uses('CsvDownloader','Vendor/Wacg');
+		App::uses('CsvDownloader','Vendor/CrudBase');
 		$csv= new CsvDownloader();
 		$csv->output($fn, $data);
 		 
@@ -498,7 +522,7 @@ class TitleCtgController extends CrudBaseController {
 				),
 				'kj_sort_no' => array(
 						'custom'=>array(
-								'rule' => array( 'custom', '/^[-]?[0-9] ?$/' ),
+								'rule' => array( 'custom', '/^[-]?[0-9]+$/' ),
 								'message' => '順番は整数を入力してください。',
 								'allowEmpty' => true
 						),
@@ -566,7 +590,7 @@ class TitleCtgController extends CrudBaseController {
 			'delete_flg'=>array(
 					'name'=>'無効フラグ',
 					'row_order'=>'TitleCtg.delete_flg',
-					'clm_show'=>1,
+					'clm_show'=>0,
 			),
 			'update_user'=>array(
 					'name'=>'更新者',
@@ -576,7 +600,7 @@ class TitleCtgController extends CrudBaseController {
 			'ip_addr'=>array(
 					'name'=>'IPアドレス',
 					'row_order'=>'TitleCtg.ip_addr',
-					'clm_show'=>1,
+					'clm_show'=>0,
 			),
 			'created'=>array(
 					'name'=>'生成日時',

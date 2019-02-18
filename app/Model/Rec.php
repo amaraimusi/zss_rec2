@@ -114,81 +114,6 @@ class Rec extends AppModel {
 		
 		return $data2;
 	}
-	
-	
-	
-	
-	/**
-	 * 一覧データを取得する(フロントA用）
-	 * @return array 記録画面一覧のデータ
-	 */
-	public function findDataForFrontA(&$crudBaseData){
-		
-		//SELECT情報
-		$fields=array(
-				'Rec.*',
-				'Title.title_name',
-		);
-		
-		$kjs = $crudBaseData['kjs'];//検索条件情報
-		$pages = $crudBaseData['pages'];//ページネーション情報
-		
-		
-		$page_no = $pages['page_no']; // ページ番号
-		$row_limit = $pages['row_limit']; // 表示件数
-		$sort_field = $pages['sort_field']; // ソートフィールド
-		$sort_desc = $pages['sort_desc']; // ソートタイプ 0:昇順 , 1:降順
-		
-		
-		//条件を作成
-		$conditions=$this->createKjConditions($kjs);
-		
-		// オフセットの組み立て
-		$offset=null;
-		if(!empty($row_limit)) $offset = $page_no * $row_limit;
-		
-		// ORDER文の組み立て
-		$order = $sort_field;
-		if(empty($order)) $order='sort_no';
-		if(!empty($sort_desc)) $order .= ' DESC';
-		
-		//JOIN情報
-		$joins = array(
-				array(
-						'type'       => 'left',
-						'table'      => 'titles',
-						'alias'      => 'Title',
-						'conditions' => array(
-								'Rec.title_id = Title.id',
-						),
-				),
-
-		);
-		
-		$option=array(
-				'fields'=>$fields,
-				'conditions' => $conditions,
-				'joins'=>$joins,
-				'limit' =>$row_limit,
-				'offset'=>$offset,
-				'order' => $order,
-		);
-		
-		//DBからデータを取得
-		$data = $this->find('all',$option);
-		
-		//データ構造を変換（2次元配列化）
-		$data2=array();
-		foreach($data as $i=>$tbl){
-			foreach($tbl as $ent){
-				foreach($ent as $key => $v){
-					$data2[$i][$key]=$v;
-				}
-			}
-		}
-		
-		return $data2;
-	}
 
 	
 	
@@ -221,7 +146,7 @@ class Rec extends AppModel {
 		$this->CrudBase->sql_sanitize($kjs); // SQLサニタイズ
 		
 		if(!empty($kjs['kj_main'])){
-			$cnds[]="CONCAT( IFNULL(Rec.rec_date, '') ,IFNULL(Rec.note, ''),IFNULL(Rec.img_fn, ''),IFNULL(Rec.img_dp, ''),IFNULL(Rec.ref_url, ''),IFNULL(Rec.no_a, ''),IFNULL(Rec.no_b, ''),IFNULL(Rec.rec_title, '')) LIKE '%{$kjs['kj_main']}%'";
+			$cnds[]="CONCAT( IFNULL(Rec.rec_date, '') ,IFNULL(Rec.note, '')) LIKE '%{$kjs['kj_main']}%'";
 		}
 		
 		// CBBXS-1003
@@ -231,10 +156,11 @@ class Rec extends AppModel {
 		if(!empty($kjs['kj_title_id']) || $kjs['kj_title_id'] ==='0' || $kjs['kj_title_id'] ===0){
 			$cnds[]="Rec.title_id = {$kjs['kj_title_id']}";
 		}
-		if(!empty($kjs['kj_rec_date'])){
-			$kj_rec_date = $kjs['kj_rec_date'];
-			$dtInfo = $this->CrudBase->guessDatetimeInfo($kj_rec_date);
-			$cnds[]="DATE_FORMAT(Rec.rec_date,'{$dtInfo['format_mysql_a']}') = DATE_FORMAT('{$dtInfo['datetime_b']}','{$dtInfo['format_mysql_a']}')";
+		if(!empty($kjs['kj_rec_date1'])){
+			$cnds[]="Rec.rec_date >= '{$kjs['kj_rec_date1']}'";
+		}
+		if(!empty($kjs['kj_rec_date2'])){
+			$cnds[]="Rec.rec_date <= '{$kjs['kj_rec_date2']}'";
 		}
 		if(!empty($kjs['kj_note'])){
 			$cnds[]="Rec.note LIKE '%{$kjs['kj_note']}%'";
@@ -245,22 +171,31 @@ class Rec extends AppModel {
 		if(!empty($kjs['kj_img_fn'])){
 			$cnds[]="Rec.img_fn LIKE '%{$kjs['kj_img_fn']}%'";
 		}
+		if(!empty($kjs['kj_file_name'])){
+			$cnds[]="Rec.file_name LIKE '%{$kjs['kj_file_name']}%'";
+		}
 		if(!empty($kjs['kj_img_dp'])){
 			$cnds[]="Rec.img_dp LIKE '%{$kjs['kj_img_dp']}%'";
 		}
 		if(!empty($kjs['kj_ref_url'])){
 			$cnds[]="Rec.ref_url LIKE '%{$kjs['kj_ref_url']}%'";
 		}
-		if(!empty($kjs['kj_no_a']) || $kjs['kj_no_a'] ==='0' || $kjs['kj_no_a'] ===0){
-			$cnds[]="Rec.no_a = {$kjs['kj_no_a']}";
+		if(!empty($kjs['kj_no_a1'])){
+			$cnds[]="Rec.no_a >= {$kjs['kj_no_a1']}";
 		}
-		if(!empty($kjs['kj_no_b']) || $kjs['kj_no_b'] ==='0' || $kjs['kj_no_b'] ===0){
-			$cnds[]="Rec.no_b = {$kjs['kj_no_b']}";
+		if(!empty($kjs['kj_no_a2'])){
+			$cnds[]="Rec.no_a <= {$kjs['kj_no_a2']}";
+		}
+		if(!empty($kjs['kj_no_b1'])){
+			$cnds[]="Rec.no_b >= {$kjs['kj_no_b1']}";
+		}
+		if(!empty($kjs['kj_no_b2'])){
+			$cnds[]="Rec.no_b <= {$kjs['kj_no_b2']}";
 		}
 		if(!empty($kjs['kj_rec_title'])){
 			$cnds[]="Rec.rec_title LIKE '%{$kjs['kj_rec_title']}%'";
 		}
-		if(!empty($kjs['kj_parent_id']) || $kjs['kj_parent_id'] ==='0' || $kjs['kj_parent_id'] ===0){
+		if(!empty($kjs['kj_parent_id'])){
 			$cnds[]="Rec.parent_id = {$kjs['kj_parent_id']}";
 		}
 		$kj_public_flg = $kjs['kj_public_flg'];
@@ -382,11 +317,9 @@ class Rec extends AppModel {
 	 * @param int $id
 	 * @param string $fn_field_strs ファイルフィールド群文字列（複数ある場合はコンマで連結）
 	 * @param array $ent エンティティ
-	 * @param string $dp_tmpl ディレクトリパス・テンプレート
-	 * @param string $viaDpFnMap 中継パスマッピング
 	 */
-	public function eliminateFiles($id, $fn_field_strs, &$ent, $dp_tmpl, $viaDpFnMap){
-		$this->CrudBase->eliminateFiles($this, $id, $fn_field_strs, $ent, $dp_tmpl, $viaDpFnMap);
+	public function eliminateFiles($id, $fn_field_strs, &$ent){
+		$this->CrudBase->eliminateFiles($this, $id, $fn_field_strs, $ent);
 	}
 	
 	
@@ -445,24 +378,6 @@ class Rec extends AppModel {
 	}
 
 	// CBBXE
-	
-	
-	/**
-	 * サブ画像集約
-	 * @param array $data
-	 * @param array $param パラメータ
-	 *  - note_field ノートフィールド名
-	 *  - img_field 画像フィールド名
-	 *  - img_via_dp_field 画像経由パスフィールド名
-	 *  - dp_tmpl ディレクトリパス・テンプレート
-	 * @return array 集約後のデータ
-	 */
-	public function aggSubImg(&$data, $param){
-		
-		App::uses('SubImgAgg', 'Vendor/Wacg');
-		$subImgAgg = new SubImgAgg();
-		$data2 = $subImgAgg->agg($data,$param);
-		return $data2;
-		
-	}
+
+
 }

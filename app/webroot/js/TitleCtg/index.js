@@ -2,6 +2,9 @@
 
 $(function() {
 	init();//初期化
+	
+	$('#title_ctg_tbl').show();// 高速表示のためテーブルは最後に表示する
+	
 });
 
 
@@ -43,6 +46,9 @@ function init(){
 	// 表示フィルターデータの定義とセット
 	var disFilData = {
 			// CBBXS-1008
+			'delete_flg':{
+				'fil_type':'delete_flg',
+			},
 
 			// CBBXE
 			
@@ -81,16 +87,25 @@ function init(){
 		}
 	});
 	
+	// リアクト機能の初期化■■■□□□■■■□□□■■■□□□開発中
+	crudBase.reactInit('title_ctg_tbl, hyo2');
 	
-	// 日付カレンダーのセット
-	// CBBXS-1030
-
-	// CBBXE
-
-		// ■■■□□□■■■□□□■■■□□□■■■
-//	// CSVインポートの初期化  <CrudBase/index.js>
-//	initCsvImportFu('title_ctg/csv_fu');
-	
+	// CrudBase一括追加機能の初期化
+	var today = new Date().toLocaleDateString();
+	crudBase.crudBaseBulkAdd.init(
+		[
+			{'field':'title_ctg_name', 'inp_type':'textarea'}, 
+//			{'field':'title_ctg_val', 'inp_type':'textarea'}, 
+//			{'field':'title_ctg_group', 'inp_type':'select', 'list':title_ctgGroupList, 'def':2}, 
+//			{'field':'title_ctg_date', 'inp_type':'date', 'def':today}, 
+//			{'field':'note', 'inp_type':'text', 'def':'TEST'}, 
+//			{'field':'sort_no', 'inp_type':'sort_no', 'def':1}, 
+		],
+		{
+			'ajax_url':'title_ctg/bulk_reg',
+			'ta_placeholder':"Excelからコピーしたタイトルカテゴリ名、タイトルカテゴリ数値を貼り付けてください。（タブ区切りテキスト）\n(例)\nタイトルカテゴリ名A\t100\nタイトルカテゴリ名B\t101\n",
+		}
+	);
 }
 
 /**
@@ -283,9 +298,25 @@ function tableTransform(mode_no){
 }
 
 /**
+ * ノート詳細を開く
+ * @param btnElm 詳細ボタン要素
+ */
+function openNoteDetail(btnElm){
+	btnElm = jQuery(btnElm);
+	crudBase.openNoteDetail(btnElm);
+}
+
+/**
  * 検索実行
  */
 function searchKjs(){
 	crudBase.searchKjs();
 }
 
+/**
+ * カレンダーモード
+ */
+function calendarViewKShow(){
+	// カレンダービューを生成 
+	crudBase.calendarViewCreate('title_ctg_date');
+}
