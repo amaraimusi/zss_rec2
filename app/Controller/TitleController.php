@@ -56,12 +56,12 @@ class TitleController extends CrudBaseController {
 			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
 		}
 		
-// 		if($this->action == 'front_a'){
-// 			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
-// 			if(empty($this->Auth->user())){
-// 				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
-// 			}
-// 		}
+		if($this->action == 'front_a'){
+			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+			if(empty($this->Auth->user())){
+				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+			}
+		}
 	
 		parent::beforeFilter();
 	
@@ -179,10 +179,10 @@ class TitleController extends CrudBaseController {
 		$this->autoRender = false;//ビュー(ctp)を使わない。
 		$errs = array(); // エラーリスト
 
-// 		// 認証中でなければエラー
-// 		if(empty($this->Auth->user())){
-// 			return 'Error:login is needed.';// 認証中でなければエラー
-// 		}
+		// 認証中でなければエラー
+		if(empty($this->Auth->user())){
+			return 'Error:login is needed.';// 認証中でなければエラー
+		}
 		
 		// 未ログインかつローカルでないなら、エラーアラートを返す。
 		if(empty($this->Auth->user()) && $_SERVER['SERVER_NAME']!='localhost'){

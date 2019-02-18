@@ -56,12 +56,12 @@ class RecCtgController extends CrudBaseController {
 			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
 		}
 		
-// 		if($this->action == 'front_a'){
-// 			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
-// 			if(empty($this->Auth->user())){
-// 				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
-// 			}
-// 		}
+		if($this->action == 'front_a'){
+			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+			if(empty($this->Auth->user())){
+				$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+			}
+		}
 	
 		parent::beforeFilter();
 	
