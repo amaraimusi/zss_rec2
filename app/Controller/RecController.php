@@ -8,7 +8,7 @@ App::uses('PagenationForCake', 'Vendor/CrudBase');
  * @note
  * 記録画面では記録一覧を検索閲覧、編集など多くのことができます。
  * 
- * @date 2015-9-16 | 2019-2-17
+ * @date 2015-9-16 | 2019-2-19
  * @version 3.2.3
  *
  */
@@ -211,6 +211,8 @@ class RecController extends CrudBaseController {
 		$json=$_POST['key1'];
 		$ent = json_decode($json,true);
 		
+		$ent['file_name'] = $this->getFileNameFromFp($ent, 'img_fn'); // ファイルパスからファイル名を取得
+		
 		// 登録パラメータ
 		$reg_param_json = $_POST['reg_param_json'];
 		$regParam = json_decode($reg_param_json,true);
@@ -241,6 +243,19 @@ class RecController extends CrudBaseController {
 		$json_data=json_encode($ent,true);//JSONに変換
 	
 		return $json_data;
+	}
+	
+	
+	/**
+	 * ファイルパスからファイル名を取得
+	 * @param array $ent
+	 * @param string $fp_field ファイルパスフィールド
+	 */
+	private function getFileNameFromFp(&$ent, $fp_field){
+		if(empty($ent[$fp_field])) return '';
+		$fp = $ent[$fp_field];
+		$ary = pathinfo($fp);
+		return $ary['basename'];
 	}
 	
 	

@@ -13,7 +13,7 @@
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
  * @date 2016-9-21 | 2019-2-19
- * @version 2.7.5
+ * @version 2.7.6
  * @histroy
  * 2018-10-21 v2.6.6 検索をGETクエリ方式にする
  * 2018-10-21 v2.6.0 フォームをアコーディオン形式にする。
@@ -2789,9 +2789,10 @@ class CrudBase{
 		//			</a>
 		//		</label>
 		//	</td>
+		elm.val(fp);
 		
 		var fp2 = this.param.midway_dp + fp; // 中間パスをはさむ
-		elm.val(fp2);
+		
 		
 		var orig_href = '';
 		var img_src = '';
