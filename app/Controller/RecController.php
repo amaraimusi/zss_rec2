@@ -27,7 +27,7 @@ class RecController extends CrudBaseController {
 	public $defSortFeild='Rec.sort_no';
 	
 	/// デフォルトソートタイプ	  0:昇順 1:降順
-	public $defSortType=1;
+	public $defSortType=0;
 	
 	/// 検索条件情報の定義
 	public $kensakuJoken=array();
@@ -51,10 +51,10 @@ class RecController extends CrudBaseController {
 	
 	public function beforeFilter() {
 
-		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
-		if(empty($this->Auth->user())){
-			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
-		}
+// 		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+// 		if(empty($this->Auth->user())){
+// 			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+// 		}
 		
 		if($this->action == 'front_a'){
 			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
@@ -151,6 +151,7 @@ class RecController extends CrudBaseController {
 		// CBBXE
 		
 		
+		
 		// ▼ サブ画像集約ライブラリ
 		App::uses('SubImgAgg', 'Vendor/CrudBase');
 		$subImgAgg = new SubImgAgg();
@@ -160,12 +161,18 @@ class RecController extends CrudBaseController {
 				'midway_dp' => '/photos/halther/' ,
 			));	// ディレクトリパス・テンプレート
 		
-		
+		// タイトル名を取得
+		$title_id = $crudBaseData['kjs']['kj_title_id'];
+		$title_name = '記録';
+		if(!empty($titleIdList[$title_id])){
+			$title_name = $titleIdList[$title_id];
+		}
+
 		$this->set($crudBaseData);
 		$this->setCommon();//当画面系の共通セット
 		$this->set(array(
 				'header' => 'front_a_header',
-				'title_for_layout'=>'記録',
+				'title_for_layout'=>$title_name,
 				'data'=> $data,
 		));
 		
@@ -210,7 +217,7 @@ class RecController extends CrudBaseController {
 		$form_type = $regParam['form_type']; // フォーム種別 new_inp,edit,delete,eliminate
 
 		// CBBXS-1024
-$ent['img_fn'] = $this->makeFilePath($_FILES, 'rsc/img/%field/y%Y/m%m/orig/%Y%m%d%H%i%s_%fn', $ent, 'img_fn');
+		$ent['img_fn'] = $this->makeFilePath($_FILES, 'y%Y/m%m/orig/%Y%m%d%H%i%s_%fn', $ent, 'img_fn');
 
 		// CBBXE
 
@@ -225,7 +232,7 @@ $ent['img_fn'] = $this->makeFilePath($_FILES, 'rsc/img/%field/y%Y/m%m/orig/%Y%m%
 		// ファイルアップロードの一括作業
 		App::uses('FileUploadK','Vendor/CrudBase/FileUploadK');
 		$fileUploadK = new FileUploadK();
-		$res = $fileUploadK->putFile1($_FILES, 'img_fn', $ent['img_fn']);
+		$res = $fileUploadK->putFile1($_FILES, 'img_fn', $ent['img_fn'], '/photos/halther/');
 		
 		if(!empty($res['err_msg'])) $errs[] = $res['err_msg'];
 		
@@ -741,7 +748,7 @@ $ent['img_fn'] = $this->makeFilePath($_FILES, 'rsc/img/%field/y%Y/m%m/orig/%Y%m%
 			'rec_title'=>array(
 					'name'=>'rec_title',
 					'row_order'=>'Rec.rec_title',
-					'clm_show'=>1,
+					'clm_show'=>0,
 			),
 			'parent_id'=>array(
 					'name'=>'親ID',

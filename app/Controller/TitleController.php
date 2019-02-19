@@ -51,10 +51,10 @@ class TitleController extends CrudBaseController {
 	
 	public function beforeFilter() {
 
-		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
-		if(empty($this->Auth->user())){
-			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
-		}
+// 		// 未ログイン中である場合、未認証モードの扱いでページ表示する。
+// 		if(empty($this->Auth->user())){
+// 			$this->Auth->allow(); // 未認証モードとしてページ表示を許可する。
+// 		}
 		
 		if($this->action == 'front_a'){
 			// 未ログイン中である場合、未認証モードの扱いでページ表示する。
@@ -110,56 +110,6 @@ class TitleController extends CrudBaseController {
 		$this->setCommon();
 
 
-	}
-	
-	
-	/**
-	 * フロントページA
-	 */
-	public function front_a(){
-		
-		// CrudBase共通処理（前）
-		$option = array(
-				'func_csv_export'=>0, // CSVエクスポート機能 0:OFF ,1:ON
-				'func_file_upload'=>1, // ファイルアップロード機能 0:OFF , 1:ON
-		);
-		$crudBaseData = $this->indexBefore('Title',$option);//indexアクションの共通先処理(CrudBaseController)
-		
-		//一覧データを取得
-		$data = $this->Title->findData($crudBaseData);
-		
-		// CrudBase共通処理（後）
-		$crudBaseData = $this->indexAfter($crudBaseData,['method_url'=>'front_a']);//indexアクションの共通後処理
-		
-		// CBBXS-1020-2
-
-		// タイトルカテゴリリスト
-		$titleCtgIdList = $this->Title->getTitleCtgIdList();
-		$title_ctg_id_json = json_encode($titleCtgIdList,JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS);
-		$this->set(array('titleCtgIdList' => $titleCtgIdList,'title_ctg_id_json' => $title_ctg_id_json));
-
-		// CBBXE
-		
-		
-// 		// ▼ サブ画像集約ライブラリ
-// 		App::uses('SubImgAgg', 'Vendor/CrudBase');
-// 		$subImgAgg = new SubImgAgg();
-// 		$data = $subImgAgg->agg($data,array(
-// 				'note_field' => 'note',			// ノートフィールド名
-// 				'img_fn_field' => 'img_fn' ,	// 画像フィールド名
-//			));	// ディレクトリパス・テンプレート
-		
-		
-		$this->set($crudBaseData);
-		$this->setCommon();//当画面系の共通セット
-		$this->set(array(
-				'header' => 'front_a_header',
-				'title_for_layout'=>'タイトル',
-				'data'=> $data,
-		));
-		
-		
-		
 	}
 
 

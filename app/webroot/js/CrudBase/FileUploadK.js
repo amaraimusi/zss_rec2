@@ -12,8 +12,8 @@
  * ファイルの初期表示
  * 
  * @license MIT
- * @version 1.2.6
- * @date 2018-7-6 | 2018-10-2
+ * @version 1.2.7
+ * @date 2018-7-6 | 2019-2-19
  * @history 
  *  - 2018-10-2 var 1.2.6 「Now Loading...」メッセージを表示する
  *  - 2018-9-18 var 1.2.5 コールバックパラメータを追加（pacb_param)
@@ -127,6 +127,7 @@ class FileUploadK{
 	 *  - pacb_param pacbに渡すパラメータ
 	 *  - img_width プレビュー画像サイスX　（画像ファイルのみ影響）
 	 *  - img_height プレビュー画像サイスY
+	 *  - midway_dp 中間ディレクトリパス
 	 */
 	addEvent(fue_id,option){
 		
@@ -212,9 +213,13 @@ class FileUploadK{
 		// 複数非同期・全終了後コールバック・初期化
 		this._cbAsynsEndInit(fps.length,option);
 
+		// 中間ディレクトリパス
+		var midway_dp = '';
+		if(option['midway_dp']) midway_dp = option['midway_dp'];
+		
 		// ファイルをXHRでプリロードする
 		for(var i in fps){
-			var fp = fps[i];
+			var fp = midway_dp + fps[i];
 			this._preloadByXhr(fp,bData);
 		}
 	}
@@ -409,7 +414,7 @@ class FileUploadK{
 			this._cbAsynsEndAction('exe2'); // プレビュー後コールバックアクション：制御と実行2
 		
 		}else if(bin_type == 'blob'){
-			
+
 			// リソース（画像など）をリソースプレビュー要素に表示させる。
 			for(var i in fileData){
 	

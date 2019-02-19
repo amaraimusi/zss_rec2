@@ -39,6 +39,7 @@ function init(){
 			'src_code':'rec', // 画面コード（スネーク記法)
 			'kjs':kjs,
 			'ni_tr_place':1,
+			'midway_dp':'/photos/halther/',
 		});
 	
 

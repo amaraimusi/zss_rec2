@@ -258,7 +258,7 @@ foreach($data as $i=>$ent){
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp_label' >タイトル: </div>
 			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('title_id',null,$titleIdList,null);?>
+				<?php $this->CrudBase->selectX('title_id', $kjs['kj_title_id'], $titleIdList,null);?>
 				<label class="text-danger" for="title_id"></label>
 			</div>
 		</div>
@@ -266,7 +266,7 @@ foreach($data as $i=>$ent){
 		<div class="cbf_inp_wrap">
 			<div class='cbf_inp_label' >記録日付: </div>
 			<div class='cbf_input'>
-				<input type="text" name="rec_date" class="valid datepicker" value=""  pattern="([0-9]{4})(/|-)([0-9]{1,2})(/|-)([0-9]{1,2})" title="日付形式（Y-m-d）で入力してください(例：2012-12-12)" />
+				<input type="text" name="rec_date" class="valid datepicker" value="<?php echo date('Y-m-d');?>"  pattern="([0-9]{4})(/|-)([0-9]{1,2})(/|-)([0-9]{1,2})" title="日付形式（Y-m-d）で入力してください(例：2012-12-12)" />
 				<label class="text-danger" for="rec_date"></label>
 			</div>
 		</div>
@@ -275,13 +275,6 @@ foreach($data as $i=>$ent){
 			<div class='cbf_input'>
 				<textarea name="note" maxlength="1000" title="1000文字以内で入力してください" style="height:100px;width:100%"></textarea>
 				<label class="text-danger" for="note"></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >記録カテゴリ: </div>
-			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
-				<label class="text-danger" for="rec_ctg_id"></label>
 			</div>
 		</div>
 
@@ -293,67 +286,76 @@ foreach($data as $i=>$ent){
 				</label>
 			</div>
 		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >ファイル名: </div>
-			<div class='cbf_input'>
-				<input type="text" name="file_name" class="valid " value=""  maxlength="512" title="512文字以内で入力してください" />
-				<label class="text-danger" for="file_name"></label>
+		
+		<div style="display:none">
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label' >記録カテゴリ: </div>
+				<div class='cbf_input'>
+					<?php $this->CrudBase->selectX('rec_ctg_id', null, $recCtgIdList,null);?>
+					<label class="text-danger" for="rec_ctg_id"></label>
+				</div>
+			</div>
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >ファイル名: </div>
+				<div class='cbf_input'>
+					<input type="text" name="file_name" class="valid " value=""  maxlength="512" title="512文字以内で入力してください" />
+					<label class="text-danger" for="file_name"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >画像ディレクトリパス: </div>
+				<div class='cbf_input'>
+					<input type="text" name="img_dp" class="valid " value=""  maxlength="128" title="128文字以内で入力してください" />
+					<label class="text-danger" for="img_dp"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >参照URL: </div>
+				<div class='cbf_input'>
+					<input type="text" name="ref_url" class="valid " value=""  maxlength="2083" title="2083文字以内で入力してください" />
+					<label class="text-danger" for="ref_url"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label' >番号A: </div>
+				<div class='cbf_input'>
+					<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
+					<label class="text-danger" for="no_a" ></label>
+				</div>
+			</div>
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label' >番号B: </div>
+				<div class='cbf_input'>
+					<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
+					<label class="text-danger" for="no_b" ></label>
+				</div>
+			</div>
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >rec_title: </div>
+				<div class='cbf_input'>
+					<input type="text" name="rec_title" class="valid " value=""  maxlength="50" title="50文字以内で入力してください" />
+					<label class="text-danger" for="rec_title"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label' >親ID: </div>
+				<div class='cbf_input'>
+					<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
+					<label class="text-danger" for="parent_id" ></label>
+				</div>
+			</div>
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label' >公開: </div>
+				<div class='cbf_input'>
+					<input type="checkbox" name="public_flg" checked class="valid"/>
+					<label class="text-danger" for="public_flg" ></label>
+				</div>
 			</div>
 		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >画像ディレクトリパス: </div>
-			<div class='cbf_input'>
-				<input type="text" name="img_dp" class="valid " value=""  maxlength="128" title="128文字以内で入力してください" />
-				<label class="text-danger" for="img_dp"></label>
-			</div>
-		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >参照URL: </div>
-			<div class='cbf_input'>
-				<input type="text" name="ref_url" class="valid " value=""  maxlength="2083" title="2083文字以内で入力してください" />
-				<label class="text-danger" for="ref_url"></label>
-			</div>
-		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号A: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_a" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="no_a" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >番号B: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_b" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="no_b" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >rec_title: </div>
-			<div class='cbf_input'>
-				<input type="text" name="rec_title" class="valid " value=""  maxlength="50" title="50文字以内で入力してください" />
-				<label class="text-danger" for="rec_title"></label>
-			</div>
-		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >親ID: </div>
-			<div class='cbf_input'>
-				<input type="text" name="parent_id" class="valid" value="" pattern="^[+-]?([0-9]*[.])?[0-9]+$" maxlength="11" title="数値を入力してください" />
-				<label class="text-danger" for="parent_id" ></label>
-			</div>
-		</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >公開: </div>
-			<div class='cbf_input'>
-				<input type="checkbox" name="public_flg" class="valid"/>
-				<label class="text-danger" for="public_flg" ></label>
-			</div>
-		</div>
-
 		<!-- CBBXE -->
 		
 		<div style="clear:both"></div>
@@ -416,89 +418,91 @@ foreach($data as $i=>$ent){
 		</div>
 
 		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >記録カテゴリ: </div>
+			<div class='cbf_inp_label_long' >画像: </div>
 			<div class='cbf_input'>
-				<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
-				<label class="text-danger" for="rec_ctg_id"></label>
+				<label for="img_fn_e" class="fuk_label" style="width:100px;height:100px;">
+					<input type="file" id="img_fn_e" class="img_fn" style="display:none" accept="image/*" title="画像ファイルをドラッグ＆ドロップ(複数可)" data-inp-ex='image_fuk' data-fp='' />
+				</label>
 			</div>
 		</div>
 
+		<div style="display:none">
 			<div class="cbf_inp_wrap">
-				<div class='cbf_inp_label_long' >画像: </div>
+				<div class='cbf_inp_label' >記録カテゴリ: </div>
 				<div class='cbf_input'>
-					<label for="img_fn_e" class="fuk_label" style="width:100px;height:100px;">
-						<input type="file" id="img_fn_e" class="img_fn" style="display:none" accept="image/*" title="画像ファイルをドラッグ＆ドロップ(複数可)" data-inp-ex='image_fuk' data-fp='' />
-					</label>
+					<?php $this->CrudBase->selectX('rec_ctg_id',null,$recCtgIdList,null);?>
+					<label class="text-danger" for="rec_ctg_id"></label>
 				</div>
 			</div>
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >ファイル名: </div>
-			<div class='cbf_input'>
-				<input type="text" name="file_name" class="valid " value=""  maxlength="512" title="512文字以内で入力してください" />
-				<label class="text-danger" for="file_name"></label>
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >ファイル名: </div>
+				<div class='cbf_input'>
+					<input type="text" name="file_name" class="valid " value=""  maxlength="512" title="512文字以内で入力してください" />
+					<label class="text-danger" for="file_name"></label>
+				</div>
+			</div>
+	
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >画像ディレクトリパス: </div>
+				<div class='cbf_input'>
+					<input type="text" name="img_dp" class="valid " value=""  maxlength="128" title="128文字以内で入力してください" />
+					<label class="text-danger" for="img_dp"></label>
+				</div>
+			</div>
+	
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >参照URL: </div>
+				<div class='cbf_input'>
+					<input type="text" name="ref_url" class="valid " value=""  maxlength="2083" title="2083文字以内で入力してください" />
+					<label class="text-danger" for="ref_url"></label>
+				</div>
+			</div>
+	
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >番号A: </div>
+				<div class='cbf_input'>
+					<input type="text" name="no_a" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
+					<label class="text-danger" for="no_a"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >番号B: </div>
+				<div class='cbf_input'>
+					<input type="text" name="no_b" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
+					<label class="text-danger" for="no_b"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >rec_title: </div>
+				<div class='cbf_input'>
+					<input type="text" name="rec_title" class="valid " value=""  maxlength="50" title="50文字以内で入力してください" />
+					<label class="text-danger" for="rec_title"></label>
+				</div>
+			</div>
+	
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp' >親ID: </div>
+				<div class='cbf_input'>
+					<input type="text" name="parent_id" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
+					<label class="text-danger" for="parent_id"></label>
+				</div>
+			</div>
+	
+			<div class="cbf_inp_wrap">
+				<div class='cbf_inp_label' >公開: </div>
+				<div class='cbf_input'>
+					<input type="checkbox" name="public_flg" class="valid"/>
+					<label class="text-danger" for="public_flg" ></label>
+				</div>
 			</div>
 		</div>
-
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >画像ディレクトリパス: </div>
-			<div class='cbf_input'>
-				<input type="text" name="img_dp" class="valid " value=""  maxlength="128" title="128文字以内で入力してください" />
-				<label class="text-danger" for="img_dp"></label>
-			</div>
-		</div>
-
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >参照URL: </div>
-			<div class='cbf_input'>
-				<input type="text" name="ref_url" class="valid " value=""  maxlength="2083" title="2083文字以内で入力してください" />
-				<label class="text-danger" for="ref_url"></label>
-			</div>
-		</div>
-
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >番号A: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_a" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
-				<label class="text-danger" for="no_a"></label>
-			</div>
-		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >番号B: </div>
-			<div class='cbf_input'>
-				<input type="text" name="no_b" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
-				<label class="text-danger" for="no_b"></label>
-			</div>
-		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >rec_title: </div>
-			<div class='cbf_input'>
-				<input type="text" name="rec_title" class="valid " value=""  maxlength="50" title="50文字以内で入力してください" />
-				<label class="text-danger" for="rec_title"></label>
-			</div>
-		</div>
-
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp' >親ID: </div>
-			<div class='cbf_input'>
-				<input type="text" name="parent_id" class="valid " value=""  maxlength="11" title="11文字以内で入力してください" />
-				<label class="text-danger" for="parent_id"></label>
-			</div>
-		</div>
-
-		<div class="cbf_inp_wrap">
-			<div class='cbf_inp_label' >公開: </div>
-			<div class='cbf_input'>
-				<input type="checkbox" name="public_flg" class="valid"/>
-				<label class="text-danger" for="public_flg" ></label>
-			</div>
-		</div>
-
+		
 			<div class="cbf_inp_wrap">
 				<div class='cbf_inp_label' >削除：</div>
 				<div class='cbf_input'>

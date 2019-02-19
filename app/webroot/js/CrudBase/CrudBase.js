@@ -12,8 +12,8 @@
  * td内部へのSetやGetは、先頭要素とtd直下にしか対応していない。
  * 複雑なtd内部にも対応するとなるとコールバックを検討しなければならない。
  * 
- * @date 2016-9-21 | 2019-1-25
- * @version 2.7.4
+ * @date 2016-9-21 | 2019-2-19
+ * @version 2.7.5
  * @histroy
  * 2018-10-21 v2.6.6 検索をGETクエリ方式にする
  * 2018-10-21 v2.6.0 フォームをアコーディオン形式にする。
@@ -47,6 +47,7 @@
  *  - ni_tr_place	新規入力追加場所フラグ 0:末尾(デフォルト） , 1:先頭
  *  - drag_and_resize_flg フォームドラッグとリサイズのフラグ 0:OFF , 1:ON(デフォルト)
  *  - form_mode フォームモード 0:ダイアログモード , 1:アコーディオンモード(デフォルト）
+ *  - midway_dp リソース配置先用の中間ディレクトリパス
  *  
  *  @param array fieldData フィールドデータ（フィールド名の配列。フィード名の順番は列並びと一致していること）
  */
@@ -292,6 +293,8 @@ class CrudBase{
 		
 		// フォームモード
 		if(param['form_mode'] == null) param['form_mode'] = 1
+		
+		if(param['midway_dp'] == null) param['midway_dp'] = '';
 		
 		
 		return param;
@@ -1037,7 +1040,7 @@ class CrudBase{
 
 		// 編集フォームからエンティティを取得する。
 		var ent = this._getEntByForm('edit');
-		
+
 		// FDにファイルオブジェクトをセットする。
 		var fd = new FormData();
 		fd = this.cbFileUploadComp.setFilesToFd(fd,'edit');
@@ -2787,7 +2790,8 @@ class CrudBase{
 		//		</label>
 		//	</td>
 		
-		elm.val(fp);
+		var fp2 = this.param.midway_dp + fp; // 中間パスをはさむ
+		elm.val(fp2);
 		
 		var orig_href = '';
 		var img_src = '';
@@ -2795,8 +2799,8 @@ class CrudBase{
 			orig_href = "javascript void(0)";
 			img_src = "img/icon/none.gif";
 		}else{
-			orig_href = fp;
-			img_src = fp.replace('/orig/', '/thum/');
+			orig_href = fp2;
+			img_src = fp2.replace('/orig/', '/thum/');
 		}
 		
 		// 弟要素のlabelを取得
@@ -2809,7 +2813,7 @@ class CrudBase{
 		// IMG要素にサムネイルパスをセットする
 		var imgElm = aElm.children().eq(0);	// IMG要素を取得
 		imgElm.attr('src', img_src);
-		
+
 		elm.attr('data-fp', fp); // 「type='file'」に対応
 
 	}
@@ -2822,13 +2826,14 @@ class CrudBase{
 	 * @param string fp 画像パス
 	 */
 	_setEntToImageFuk(elm, field, fp){
-		
+
 		elm.attr('data-fp', fp); // 「type='file'」に対応
 
 		var fue_id = elm.attr('id');
-
+		var option = {'midway_dp':this.param.midway_dp};
+		
 		// file要素にファイルパスをセットする
-		this.cbFileUploadComp.setFilePaths(fue_id, fp);
+		this.cbFileUploadComp.setFilePaths(fue_id, fp, option);
 
 	}
 	
